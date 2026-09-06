@@ -197,28 +197,59 @@
   }
   const CLS_LABEL = { ok: "correto", near: "parcial", no: "errado" };
 
+  function levenshtein(a, b) {
+    const prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      let diag = prev[0]; prev[0] = i;
+      for (let j = 1; j <= b.length; j++) {
+        const tmp = prev[j];
+        prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+        diag = tmp;
+      }
+    }
+    return prev[b.length];
+  }
+  // Sem lista de sugestões: aceita o nome digitado com erro de digitação, acento
+  // ou incompleto, desde que só um item encaixe. Devolve o item e se foi corrigido.
   function findItem(mode, q) {
-    const nq = norm(q);
+    const nq = norm(q).replace(/\s+/g, " ");
     if (!nq) return null;
-    return poolFor(mode).find(i => i.id === q || norm(i.nome) === nq || (i.alias || []).some(a => norm(a) === nq)) || null;
+    const pool = poolFor(mode);
+    const names = i => [i.nome, ...(i.alias || [])].map(norm);
+    const exact = pool.find(i => i.id === q || names(i).includes(nq));
+    if (exact) return { item: exact, fixed: false };
+    if (nq.length < 3) return null;
+    // começo do nome, de uma palavra do nome ou do apelido
+    const starts = pool.filter(i => names(i).some(n => n.startsWith(nq) || n.split(" ").some(w => w.startsWith(nq))));
+    if (starts.length === 1) return { item: starts[0], fixed: true };
+    // distância de edição, tolerando ~1 erro a cada 4 letras
+    let best = null, bestD = Infinity, tie = false;
+    for (const i of pool) for (const n of names(i)) {
+      const d = levenshtein(nq, n);
+      if (d < bestD) { best = i; bestD = d; tie = false; }
+      else if (d === bestD && i !== best) tie = true;
+    }
+    const limit = Math.max(1, Math.floor(nq.length / 4));
+    return best && !tie && bestD <= limit ? { item: best, fixed: true } : null;
   }
   function guess(q) {
     const g = current();
     if (g.status !== "playing") return;
-    const item = findItem(g.mode, q);
-    if (!item) { shake(); toast("Não achei esse nome. Escolha um da lista."); return; }
-    if (g.guesses.includes(item)) { shake(); toast("Você já tentou esse."); return; }
+    const found = findItem(g.mode, q);
+    if (!found) { shake(); toast("Não reconheci esse nome. Confira a escrita."); return; }
+    const item = found.item;
+    if (g.guesses.includes(item)) { shake(); toast(`Você já tentou ${item.nome}.`); return; }
+    if (found.fixed) toast(`Entendi como ${item.nome}.`);
     g.guesses.push(item);
     g.status = statusOf(g.mode, g.guesses, g.target);
     if (!g.free) store.set(dayKey(g.mode, g.day), g.guesses.map(i => i.id));
     input.value = "";
-    closeList();
     if (g.status !== "playing" && isToday(g)) record(g);
     render(true);
     if (g.status === "playing") input.focus();
   }
 
-  const input = $("#guess"), goBtn = $("#go"), list = $("#list"), board = $("#board"), result = $("#result");
+  const input = $("#guess"), goBtn = $("#go"), board = $("#board"), result = $("#result");
 
   function render(animate = false) {
     const mode = modeById(modeId), g = current();
@@ -366,7 +397,7 @@
 
   function setDay(day) {
     viewDay = Math.max(0, Math.min(dayIndex, day)); free = false;
-    input.value = ""; closeList(); closeModal(); render(); input.focus();
+    input.value = ""; closeModal(); render(); input.focus();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function archiveHTML(id) {
@@ -397,7 +428,7 @@
     Object.keys(daily).forEach(k => delete daily[k]);
     Object.keys(freeGames).forEach(k => delete freeGames[k]);
     viewDay = dayIndex; free = false;
-    input.value = ""; closeList(); closeModal();
+    input.value = ""; closeModal();
     render();
     toast("Meia-noite! Novo desafio disponível.");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -460,51 +491,14 @@
     setTimeout(() => wrap.remove(), 3500);
   }
 
-  let sel = -1; // item destacado na lista de sugestões
-  function openList() {
-    const g = current(); if (g.status !== "playing") return closeList();
-    const q = norm(input.value);
-    const match = i => !q || norm(i.nome).includes(q) || (i.alias || []).some(a => norm(a).includes(q));
-    const starts = i => norm(i.nome).startsWith(q) ? 0 : 1;
-    const items = poolFor(g.mode).filter(i => !g.guesses.includes(i) && match(i))
-      .sort((a, b) => starts(a) - starts(b) || a.nome.localeCompare(b.nome, "pt"));
-    list.innerHTML = items.map(i =>
-      `<div role="option" data-id="${i.id}"><span class="nm">${esc(i.nome)}</span>${i.dlc ? `<small>DLC</small>` : ""}</div>`).join("");
-    list.style.display = items.length ? "block" : "none";
-    sel = -1;
-  }
-  function closeList() { list.style.display = "none"; sel = -1; }
-  function submitFromInput() {
-    // Com um item destacado, vai ele. Senão, nome exato digitado ganha do primeiro da lista
-    // (ex.: "Sun" é apelido do Sol, mas a lista começa em "Estação Solar").
-    const open = list.style.display !== "none";
-    if (open && sel >= 0) return guess(list.children[sel].dataset.id);
-    const exact = findItem(current().mode, input.value);
-    if (exact) return guess(exact.id);
-    guess(open && list.children[0] ? list.children[0].dataset.id : input.value);
-  }
-
-  input.addEventListener("input", openList);
-  input.addEventListener("focus", openList);
-  input.addEventListener("keydown", e => {
-    if (e.key === "ArrowDown" && list.style.display === "none") openList();
-    const opts = [...list.children];
-    if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(sel + 1, opts.length - 1); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(sel - 1, 0); }
-    else if (e.key === "Enter") { e.preventDefault(); submitFromInput(); return; }
-    else if (e.key === "Escape") { closeList(); return; }
-    else return;
-    opts.forEach((o, i) => o.classList.toggle("sel", i === sel));
-    opts[sel]?.scrollIntoView({ block: "nearest" });
-  });
-  list.addEventListener("mousedown", e => { e.preventDefault(); const d = e.target.closest("[data-id]"); if (d) guess(d.dataset.id); });
-  document.addEventListener("click", e => { if (!e.target.closest(".search")) closeList(); });
+  const submitFromInput = () => guess(input.value);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitFromInput(); } });
   goBtn.addEventListener("click", submitFromInput);
 
   $("#modes").addEventListener("click", e => {
     const b = e.target.closest("[data-mode]"); if (!b) return;
     modeId = b.dataset.mode; store.set("mode", modeId);
-    input.value = ""; closeList(); render();
+    input.value = ""; render();
   });
   $("#seg-daily").addEventListener("click", () => setFree(false));
   $("#seg-free").addEventListener("click", () => setFree(true));
