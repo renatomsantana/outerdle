@@ -117,10 +117,10 @@
   /* ---------- modos ---------- */
   const MODES = [
     { id: "locais", label: "Locais", kind: "grid", items: LOCAIS, cols: COLS_LOCAIS,
-      title: "Adivinhe o local de hoje", sub: "Digite qualquer corpo celeste pra começar", placeholder: "Nome do local...",
+      title: "Adivinhe o local de hoje", sub: "Pode estar em qualquer corpo celeste", placeholder: "Nome do local...",
       hintIdx: [1, 3] },
     { id: "personagens", label: "Personagens", kind: "grid", items: PERSONAGENS, cols: COLS_PERSONAGENS,
-      title: "Adivinhe o personagem de hoje", sub: "Hearthianos, Nomai e quem mais estiver por aí", placeholder: "Nome do personagem...",
+      title: "Adivinhe o personagem de hoje", sub: "Pode ser qualquer personagem, qualquer um mesmo", placeholder: "Nome do personagem...",
       hintIdx: [0, 1] },
     { id: "diario", label: "Diário", kind: "hints", items: LOCAIS,
       title: "De onde é esse registro?", sub: "Cada erro revela uma nova entrada do diário de bordo", placeholder: "Nome do local..." }
@@ -274,7 +274,10 @@
     const m = g.mode, n = g.guesses.length, done = g.status !== "playing";
     return `<div class="hints">${hintsAt().map((at, i) => {
       const open = done || n >= at, txt = g.target.dicas[m.hintIdx[i]];
-      return `<div class="hint ${open ? "" : "locked"}"><b>Dica ${i + 1}</b><span>${open ? esc(txt) : `libera na ${at}ª tentativa`}</span></div>`;
+      const rem = at - n, falta = rem === 1 ? "Falta 1 chute" : `Faltam ${rem} chutes`;
+      return open
+        ? `<div class="hint"><b>Dica ${i + 1}</b><span>${esc(txt)}</span></div>`
+        : `<div class="hint locked"><span>${falta} para liberar a dica ${i + 1}</span></div>`;
     }).join("")}</div>`;
   }
 
