@@ -95,7 +95,7 @@ O logo, o wallpaper e as imagens de personagens vêm dos materiais públicos da 
 
 - o conteúdo deve ser gratuito e não pode se apresentar como oficial ou aprovado pela Mobius;
 - nada de venda em massa, crowdfunding, NFT ou cripto;
-- incluir o aviso "This work is unofficial Fan Content created under permission from the Mobius Digital Fan Content Policy" (está no rodapé, em português e inglês);
+- incluir o aviso "This work is unofficial Fan Content created under permission from the Mobius Digital Fan Content Policy" (está no rodapé da página de privacidade, em português e inglês);
 - a Mobius pode pedir a remoção a qualquer momento.
 
 Se um dia quiser monetizar o site, troque a arte por material próprio antes.
