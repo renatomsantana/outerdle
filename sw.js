@@ -1,7 +1,7 @@
 /* Outerdle — service worker
    Estratégia: tenta a rede primeiro (pra pegar atualizações) e cai pro cache
    quando estiver offline. Troque a versão abaixo ao publicar mudanças grandes. */
-const CACHE = "outerdle-v4";
+const CACHE = "outerdle-v5";
 const FILES = [
   "./",
   "./index.html",

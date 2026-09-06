@@ -290,13 +290,14 @@
     html += m.cols.map(c => `<div class="head" role="columnheader" title="${esc(c.title || "")}">${esc(c.l)}</div>`).join("");
     [...g.guesses].reverse().forEach((it, ri) => {
       const isNew = animate && ri === 0;
-      html += `<div class="tile name" role="cell">${it.emoji ? `<span class="em">${it.emoji}</span>` : ""}${esc(it.nome)}</div>`;
+      html += `<div class="row" role="row"><div class="tile name" role="cell">${it.emoji ? `<span class="em">${it.emoji}</span>` : ""}${esc(it.nome)}</div>`;
       m.cols.forEach((c, ci) => {
         const r = compare(c, it[c.k], g.target[c.k]);
         const style = isNew ? `style="animation-delay:${ci * 0.12}s"` : `style="animation:none"`;
-        html += `<div class="tile ${r.cls}" role="cell" ${style} title="${esc(r.title || CLS_LABEL[r.cls])}" aria-label="${esc(c.l)}: ${esc(r.text)}, ${CLS_LABEL[r.cls]}">
+        html += `<div class="tile ${r.cls}" role="cell" data-l="${esc(c.l)}" ${style} title="${esc(r.title || CLS_LABEL[r.cls])}" aria-label="${esc(c.l)}: ${esc(r.text)}, ${CLS_LABEL[r.cls]}">
           <span>${esc(r.text)}</span>${r.arrow ? `<small>${r.arrow}</small>` : ""}</div>`;
       });
+      html += `</div>`;
     });
     html += `</div></div>`;
     if (g.status === "playing" && settings.helper) {
