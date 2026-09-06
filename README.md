@@ -83,6 +83,7 @@ og.jpg          imagem de prévia para redes sociais (logo + wallpaper)
 tools/og.html, tools/icon.html   fontes das composições acima (a og.jpg atual foi gerada com Pillow)
 manifest.webmanifest  manifesto PWA
 sw.js           service worker (offline)
+privacidade.html   política de privacidade (o site não coleta nada; só localStorage)
 404.html, robots.txt, _headers, .nojekyll   arquivos de hospedagem
 .github/workflows/pages.yml   publicação automática no GitHub Pages
 outerdle.md     versão original (arquivo único), mantida como referência

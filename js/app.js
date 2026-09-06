@@ -226,8 +226,10 @@
 
     const archive = !free && viewDay !== dayIndex;
     $("#title").textContent = mode.title;
-    $("#subtitle").textContent = g.free ? "Modo livre: alvo aleatório, sem afetar as estatísticas"
-      : archive ? `Arquivo: desafio #${viewDay + 1}, de ${fmtDate(viewDay)}. Não conta pras estatísticas.` : mode.sub;
+    const at = hintsAt();
+    const hintInfo = mode.kind === "grid" && at.length ? ` Dicas no ${at[0]}º e no ${at[1]}º chute.` : "";
+    $("#subtitle").textContent = (g.free ? "Modo livre: alvo aleatório, sem afetar as estatísticas."
+      : archive ? `Arquivo: desafio #${viewDay + 1}, de ${fmtDate(viewDay)}. Não conta pras estatísticas.` : mode.sub + ".") + hintInfo;
     $("#seg-daily").classList.toggle("on", !free);
     $("#seg-daily").innerHTML = archive ? `#${viewDay + 1}` : `Hoje #${dayNum}`;
     $("#seg-free").classList.toggle("on", free);
@@ -255,22 +257,16 @@
 
   function extraHintsHTML(g) {
     const m = g.mode, n = g.guesses.length, done = g.status !== "playing";
-    return `<div class="hints">${hintsAt().map((at, i) => {
-      const open = done || n >= at, txt = g.target.dicas[m.hintIdx[i]];
-      const rem = at - n, falta = rem === 1 ? "Falta 1 chute" : `Faltam ${rem} chutes`;
-      return open
-        ? `<div class="hint"><b>Dica ${i + 1}</b><span>${esc(txt)}</span></div>`
-        : `<div class="hint locked"><span>${falta} para liberar a dica ${i + 1}</span></div>`;
-    }).join("")}</div>`;
+    const open = hintsAt().map((at, i) => ({ at, i })).filter(h => done || n >= h.at);
+    if (!open.length) return "";
+    return `<div class="hints">${open.map(({ i }) =>
+      `<div class="hint"><b>Dica ${i + 1}</b><span>${esc(g.target.dicas[m.hintIdx[i]])}</span></div>`).join("")}</div>`;
   }
 
   function gridHTML(g, animate) {
     const m = g.mode;
     let html = extraHintsHTML(g);
-    if (!g.guesses.length) {
-      html += `<p class="empty">Nenhuma tentativa ainda. ${plural(poolFor(m).length, "opção possível", "opções possíveis")}.</p>`;
-      return html;
-    }
+    if (!g.guesses.length) return html;
     html += `<div class="grid-wrap"><div class="grid" style="--cols:${m.cols.length}" role="table" aria-label="Tentativas">`;
     html += `<div class="head" role="columnheader">${m.id === "personagens" ? "Personagem" : "Local"}</div>`;
     html += m.cols.map(c => `<div class="head" role="columnheader" title="${esc(c.title || "")}">${esc(c.l)}</div>`).join("");

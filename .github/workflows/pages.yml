@@ -29,7 +29,7 @@ jobs:
       - name: Montar pasta do site
         run: |
           mkdir -p _site/css _site/js _site/assets
-          cp index.html 404.html og.jpg icon-512.png icon-192.png apple-touch-icon.png favicon-32.png manifest.webmanifest sw.js robots.txt _headers .nojekyll _site/
+          cp index.html 404.html privacidade.html og.jpg icon-512.png icon-192.png apple-touch-icon.png favicon-32.png manifest.webmanifest sw.js robots.txt _headers .nojekyll _site/
           cp css/style.css _site/css/
           cp js/app.js js/data.js _site/js/
           cp assets/* _site/assets/
