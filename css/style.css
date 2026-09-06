@@ -25,19 +25,17 @@ html[data-contrast="1"]{ --ok:#2e86de; --near:#f5a623; --no:#4a4f63; }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
-  background:var(--bg);
-  background-image:
-    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.55) 50%, transparent 51%),
-    radial-gradient(1px 1px at 78% 9%,  rgba(255,255,255,.45) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 62% 34%, rgba(255,255,255,.5) 50%, transparent 51%),
-    radial-gradient(1px 1px at 30% 62%, rgba(255,255,255,.4) 50%, transparent 51%),
-    radial-gradient(1px 1px at 88% 58%, rgba(255,255,255,.5) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 45% 88%, rgba(255,255,255,.35) 50%, transparent 51%),
-    radial-gradient(1px 1px at 8% 82%,  rgba(255,255,255,.45) 50%, transparent 51%),
-    radial-gradient(ellipse at 50% -10%, #1a2140 0%, var(--bg) 60%);
+  background:#05070f;
   color:var(--text);
   font-family:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
   font-size:15px;line-height:1.5;min-height:100vh;
+}
+/* wallpaper oficial (fogueira em Timber Hearth) fixo atrás de tudo, escurecido pra leitura */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(5,7,15,.35) 0%, rgba(5,7,15,.72) 45%, rgba(5,7,15,.94) 100%),
+    url("../assets/wallpaper.jpg") center top / cover no-repeat #05070f;
 }
 a{color:inherit}
 button{font:inherit;color:inherit}
@@ -46,9 +44,10 @@ button{font:inherit;color:inherit}
 
 /* ---------- topo ---------- */
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:8px 0 18px}
-.logo h1{margin:0;font-size:42px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;line-height:1}
-.logo h1 b{color:var(--accent)}
-.logo p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.logo h1{margin:0;display:flex;align-items:flex-end;gap:8px;line-height:1}
+.logo h1 img{height:92px;width:auto;display:block;filter:drop-shadow(0 4px 14px rgba(0,0,0,.6))}
+.logo h1 b{color:var(--accent);font-size:36px;font-weight:800;letter-spacing:.06em;padding-bottom:6px;text-shadow:0 3px 12px rgba(0,0,0,.7)}
+.logo p{margin:6px 0 0;color:var(--muted);font-size:13px;text-shadow:0 1px 6px rgba(0,0,0,.8)}
 .icons{display:flex;gap:6px;flex:none}
 .icon{
   width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);
@@ -69,7 +68,10 @@ button{font:inherit;color:inherit}
 .mode .dot.lost{background:var(--danger)}
 
 /* ---------- caixas ---------- */
-.box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:16px;box-shadow:var(--shadow)}
+.box{background:rgba(22,28,48,.94);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:16px;box-shadow:var(--shadow)}
+/* card de resultado com a fogueira oficial ao fundo */
+.box.result{background:linear-gradient(180deg,rgba(14,18,32,.86),rgba(22,28,48,.97) 70%),url("../assets/campfire.jpg") center 30% / cover no-repeat}
+.art{width:calc(100% + 48px);margin:-24px -24px 14px;border-radius:var(--radius) var(--radius) 0 0;display:block;aspect-ratio:16/7;object-fit:cover;object-position:center 35%}
 .game-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
 .game-head h2{margin:0 0 2px;font-size:20px;font-weight:700}
 .game-head .sub{margin:0;color:var(--muted);font-size:13px}
@@ -184,8 +186,9 @@ html[data-anim="0"] .tile,html[data-anim="0"] .entry.new{animation:none !importa
 .timer b{color:var(--text);font-variant-numeric:tabular-nums}
 
 /* ---------- rodapé ---------- */
-footer{text-align:center;color:var(--muted);font-size:12px;margin-top:8px}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:8px;text-shadow:0 1px 6px rgba(0,0,0,.8)}
 footer p{margin:4px 0}
+footer .en{font-size:11px;opacity:.8}
 
 /* ---------- modal ---------- */
 .modal{position:fixed;inset:0;background:rgba(5,8,18,.75);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
@@ -237,7 +240,8 @@ footer p{margin:4px 0}
 /* ---------- responsivo ---------- */
 @media (max-width:560px){
   .wrap{padding:14px 12px 50px}
-  .logo h1{font-size:30px}
+  .logo h1 img{height:64px}
+  .logo h1 b{font-size:26px;padding-bottom:4px}
   .logo p{font-size:12px}
   .icons{gap:4px}
   .icon{width:36px;height:36px;font-size:16px}

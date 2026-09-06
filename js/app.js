@@ -537,6 +537,7 @@
 
   function helpHTML() {
     return `
+      <img class="art" src="assets/riebeck.jpg" alt="Riebeck tocando banjo em Brittle Hollow" loading="lazy">
       <h3>Como jogar</h3>
       <p>Todo dia tem um desafio novo em cada modo. O progresso fica salvo neste navegador.</p>
       <h4>🪐 Locais</h4>

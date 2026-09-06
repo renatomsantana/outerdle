@@ -77,15 +77,27 @@ js/app.js       motor do jogo: modos, sorteio diário, arquivo, estatísticas, m
 js/data.js      conteúdo CODIFICADO, gerado por tools/build.js (não edite à mão)
 src/dados.js    conteúdo legível: locais, personagens e colunas (edite aqui)
 tools/build.js  valida src/dados.js e gera js/data.js
-tools/og.html   fonte da imagem de prévia (og.png); abra no Chrome e capture 1200×630
-icon.svg        ícone (favicon e app instalado)
-og.png          imagem de prévia para redes sociais
+assets/         arte oficial do jogo: logo.png, wallpaper.jpg (fogueira), campfire.jpg e riebeck.jpg (press kit), village.jpg (404)
+icon-512.png, icon-192.png, apple-touch-icon.png, favicon-32.png   ícones (recorte da fogueira do wallpaper)
+og.jpg          imagem de prévia para redes sociais (logo + wallpaper)
+tools/og.html, tools/icon.html   fontes das composições acima (a og.jpg atual foi gerada com Pillow)
 manifest.webmanifest  manifesto PWA
 sw.js           service worker (offline)
 404.html, robots.txt, _headers, .nojekyll   arquivos de hospedagem
 .github/workflows/pages.yml   publicação automática no GitHub Pages
 outerdle.md     versão original (arquivo único), mantida como referência
 ```
+
+## Arte oficial e política de fãs
+
+O logo, o wallpaper e as imagens de personagens vêm dos materiais públicos da Mobius Digital (CDN da Steam e press kit em mobiusdigitalgames.com/press). O uso segue a [Política de Conteúdo de Fãs da Mobius](https://www.mobiusdigitalgames.com/fan-content-policy.html), que em resumo pede:
+
+- o conteúdo deve ser gratuito e não pode se apresentar como oficial ou aprovado pela Mobius;
+- nada de venda em massa, crowdfunding, NFT ou cripto;
+- incluir o aviso "This work is unofficial Fan Content created under permission from the Mobius Digital Fan Content Policy" (está no rodapé, em português e inglês);
+- a Mobius pode pedir a remoção a qualquer momento.
+
+Se um dia quiser monetizar o site, troque a arte por material próprio antes.
 
 ## Segurança e "inspecionar elemento"
 
