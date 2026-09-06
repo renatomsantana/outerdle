@@ -44,10 +44,9 @@ button{font:inherit;color:inherit}
 
 /* ---------- topo ---------- */
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:8px 0 18px}
-.logo h1{margin:0;display:flex;align-items:flex-end;gap:8px;line-height:1}
+.logo h1{margin:0;display:flex;align-items:flex-start;gap:6px;line-height:1}
 .logo h1 img{height:92px;width:auto;display:block;filter:drop-shadow(0 4px 14px rgba(0,0,0,.6))}
-.logo h1 b{color:var(--accent);font-size:36px;font-weight:800;letter-spacing:.06em;padding-bottom:6px;text-shadow:0 3px 12px rgba(0,0,0,.7)}
-.logo p{margin:6px 0 0;color:var(--muted);font-size:13px;text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.logo h1 b{color:var(--accent);font-size:27px;font-weight:800;font-style:italic;letter-spacing:.02em;padding-top:3px;text-shadow:0 3px 12px rgba(0,0,0,.7)}
 .icons{display:flex;gap:6px;flex:none}
 .icon{
   width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);
@@ -242,7 +241,7 @@ footer .en{font-size:11px;opacity:.8}
   .tile{font-size:13px;min-height:62px}
   .tile.name{font-size:14px}
   .logo h1 img{height:104px}
-  .logo h1 b{font-size:40px}
+  .logo h1 b{font-size:30px;padding-top:4px}
 }
 
 /* ---------- tablet ---------- */
@@ -257,8 +256,7 @@ footer .en{font-size:11px;opacity:.8}
   .top{flex-direction:column;align-items:center;text-align:center;gap:10px;margin:4px 0 14px}
   .logo h1{justify-content:center}
   .logo h1 img{height:60px}
-  .logo h1 b{font-size:24px;padding-bottom:4px}
-  .logo p{font-size:12px}
+  .logo h1 b{font-size:18px;padding-top:2px}
   .icons{gap:6px}
   .icon{width:40px;height:40px;font-size:17px}
   .modes{gap:6px;margin-bottom:14px}
