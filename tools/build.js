@@ -27,6 +27,7 @@ for (const l of data.LOCAIS) {
   check(!ids.has(l.id), `id repetido: ${l.id}`); ids.add(l.id);
   check(Array.isArray(l.dicas) && l.dicas.length === 5, `${l.id}: precisa de 5 dicas`);
   for (const c of data.COLS_LOCAIS) check(c.k in l, `${l.id}: falta o campo "${c.k}"`);
+  if ("diario" in l) check(Array.isArray(l.diario) && l.diario.length >= 3 && l.diario.length <= 6, `${l.id}: diario precisa de 3 a 6 registros`);
 }
 const locais = new Set(data.LOCAIS.map(l => l.nome));
 for (const p of data.PERSONAGENS) {
@@ -45,4 +46,4 @@ const blob = bytes.toString("base64");
 
 const out = `/* Outerdle — conteúdo gerado por tools/build.js. Edite src/dados.js, não este arquivo. */\nwindow.__ow=${JSON.stringify(blob)};\n`;
 fs.writeFileSync(OUT, out);
-console.log(`✓ js/data.js gerado (${data.LOCAIS.length} locais, ${data.PERSONAGENS.length} personagens, ${(out.length / 1024).toFixed(1)} KB)`);
+console.log(`✓ js/data.js gerado (${data.LOCAIS.length} locais, ${data.LOCAIS.filter(l => l.diario).length} com diário, ${data.PERSONAGENS.length} personagens, ${(out.length / 1024).toFixed(1)} KB)`);

@@ -122,8 +122,8 @@
     { id: "personagens", label: "Personagens", kind: "grid", items: PERSONAGENS, cols: COLS_PERSONAGENS,
       title: "Adivinhe o personagem de hoje", sub: "Pode ser qualquer personagem, qualquer um mesmo", placeholder: "Nome do personagem...",
       hintIdx: [0, 1] },
-    { id: "diario", label: "Diário", kind: "hints", items: LOCAIS,
-      title: "De onde é esse registro?", sub: "Cada erro revela uma nova entrada do diário de bordo", placeholder: "Nome do local..." }
+    { id: "diario", label: "Diário", kind: "hints", items: LOCAIS.filter(l => l.diario),
+      title: "De onde é esse registro?", sub: "Ache o local com entradas do diário de bordo", placeholder: "Nome do local..." }
   ];
   const modeById = id => MODES.find(m => m.id === id) || MODES[0];
 
@@ -312,7 +312,8 @@
 
   function hintsHTML(g, animate) {
     const m = g.mode, n = g.guesses.length, done = g.status !== "playing";
-    const shown = done ? g.target.dicas.length : Math.min(n + 1, g.target.dicas.length);
+    const log = g.target.diario || g.target.dicas;
+    const shown = done ? log.length : Math.min(n + 1, log.length);
     const max = maxTries(m);
     let html = `<div class="tries" aria-label="Tentativas">${Array.from({ length: max }, (_, i) => {
       const it = g.guesses[i];
@@ -320,7 +321,7 @@
       return `<i class="${cls}"></i>`;
     }).join("")}<span>${done ? "Encerrado" : `Tentativa ${n + 1} de ${max}`}</span></div>`;
 
-    html += `<div class="log">${g.target.dicas.map((d, i) => {
+    html += `<div class="log">${log.map((d, i) => {
       const open = i < shown, isNew = animate && open && i === shown - 1 && !done;
       return `<div class="entry ${open ? "" : "locked"} ${isNew ? "new" : ""}">
         <b>Registro ${i + 1}</b><span>${open ? esc(d) : "Libera após a próxima tentativa"}</span></div>`;
@@ -546,9 +547,9 @@
       <h4>Locais</h4>
       <p>Chute um corpo celeste. Cada coluna mostra se aquele atributo bate com o local do dia. Tentativas ilimitadas${settings.hard ? ", sem dicas extras" : `, e dicas extras aparecem depois da ${hintsAt()[0]}ª e da ${hintsAt()[1]}ª`}.</p>
       <h4>Personagens</h4>
-      <p>Mesma ideia, mas com Hearthianos e Nomai: espécie, local, papel, instrumento e status.</p>
+      <p>Mesma ideia, mas com Lenhosos e Nomai: espécie, local, papel, instrumento e status.</p>
       <h4>Diário</h4>
-      <p>Você recebe um registro do diário de bordo e tem ${maxTries(MODES[2])} tentativas pra dizer de que lugar ele fala. Cada erro libera um registro novo, mais específico que o anterior.</p>
+      <p>Você recebe um registro do diário de bordo e tem ${maxTries(MODES[2])} tentativas pra dizer de que lugar ele fala. Os registros são os do próprio jogo, e cada erro libera mais um.</p>
       <div class="legend">
         <span><i style="background:var(--ok)"></i> Correto</span>
         <span><i style="background:var(--near)"></i> Parcial</span>
