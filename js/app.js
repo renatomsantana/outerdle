@@ -109,7 +109,7 @@
   const MODES = [
     { id: "locais", label: "Locais", kind: "grid", items: LOCAIS, cols: COLS_LOCAIS,
       title: "Adivinhe o local de hoje", sub: "Pode estar em qualquer corpo celeste", placeholder: "Nome do local...",
-      hintIdx: [1, 3] },
+      hintIdx: [0, 1] },
     { id: "personagens", label: "Personagens", kind: "grid", items: PERSONAGENS, cols: COLS_PERSONAGENS,
       title: "Adivinhe o personagem de hoje", sub: "Pode ser qualquer personagem, qualquer um mesmo", placeholder: "Nome do personagem...",
       hintIdx: [0, 1] },

@@ -18,7 +18,7 @@ const ids = new Set(); let erros = 0;
 const check = (ok, msg) => { if (!ok) { console.error("  ✗ " + msg); erros++; } };
 for (const l of data.LOCAIS) {
   check(!ids.has(l.id), `id repetido: ${l.id}`); ids.add(l.id);
-  check(Array.isArray(l.dicas) && l.dicas.length === 5, `${l.id}: precisa de 5 dicas`);
+  check(Array.isArray(l.dicas) && l.dicas.length === 2, `${l.id}: precisa de 2 dicas`);
   for (const c of data.COLS_LOCAIS) check(c.k in l, `${l.id}: falta o campo "${c.k}"`);
   if ("diario" in l) check(Array.isArray(l.diario) && l.diario.length >= 3 && l.diario.length <= 6, `${l.id}: diario precisa de 3 a 6 registros`);
 }
