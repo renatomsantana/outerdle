@@ -38,7 +38,7 @@ O arquivo `_headers` já traz os cabeçalhos de segurança para essas plataforma
 - [x] Endereço final (`https://renatomsantana.github.io/outerdle/`) já está no `index.html` (canonical, `og:url`, `og:image`, `twitter:image`). Se mudar de domínio, troque lá.
 - [ ] Teste a prévia em [opengraph.xyz](https://www.opengraph.xyz) ou mandando o link pra você mesmo no WhatsApp.
 - [ ] Se quiser contar visitas, siga o comentário no fim do `index.html` (GoatCounter é grátis e não exige aviso de cookies).
-- [ ] Ao publicar mudanças grandes, aumente a versão em `sw.js` (`outerdle-v2` → `v3`) para os celulares atualizarem o cache.
+- [ ] Ao publicar mudanças grandes, aumente a versão em `sw.js` (`outerdle-v6` → `v7`) para os celulares atualizarem o cache.
 
 ### Para o jogo espalhar
 
@@ -50,9 +50,9 @@ O arquivo `_headers` já traz os cabeçalhos de segurança para essas plataforma
 
 | Modo | Como funciona |
 | --- | --- |
-| 🪐 **Locais** | Chute um corpo celeste. Cada coluna (tipo, órbita, atmosfera, perigo, Nomai, viajante) mostra se bate com o alvo. Tentativas ilimitadas; dicas extras na 3ª e na 5ª. |
-| 🎻 **Personagens** | Mesma mecânica com Hearthianos e Nomai: espécie, local, papel, instrumento e status. |
-| 📓 **Diário** | Você recebe um registro do diário de bordo e tem 6 tentativas. Cada erro revela um registro mais específico. |
+| **Locais** | Chute um corpo celeste. Cada coluna (tipo, órbita, atmosfera, perigo, Nomai, viajante) mostra se bate com o alvo. Tentativas ilimitadas; dicas extras na 3ª e na 5ª. |
+| **Personagens** | Mesma mecânica com Hearthianos e Nomai: espécie, local, papel, instrumento e status. |
+| **Diário** | Você recebe um registro do diário de bordo e tem 6 tentativas. Cada erro revela um registro mais específico. |
 
 Cada modo tem um alvo diário próprio, sorteado de forma determinística: o mesmo dia mostra o mesmo alvo pra todo mundo. O dia vira à meia-noite no horário do jogador, e a página troca sozinha, sem recarregar. Um relógio no card mostra quanto falta.
 
@@ -60,7 +60,7 @@ Cada modo tem um alvo diário próprio, sorteado de forma determinística: o mes
 
 O **modo livre** sorteia alvos aleatórios, quantos quiser, sem afetar as estatísticas.
 
-O **arquivo** (ícone 📅) deixa jogar qualquer dia desde o lançamento. Dias anteriores ficam salvos, mas só o de hoje entra nas estatísticas.
+O **arquivo** (ícone de calendário) deixa jogar qualquer dia desde o lançamento. Dias anteriores ficam salvos, mas só o de hoje entra nas estatísticas.
 
 Nos modos de grade, um contador abaixo das tentativas mostra quantas opções ainda são compatíveis com todas as respostas.
 
@@ -120,7 +120,7 @@ Tudo que é conteúdo mora em `src/dados.js`. Depois de editar, rode `node tools
 - **Local novo:** adicione um objeto em `LOCAIS` com `id` único, os atributos das colunas (`tipo`, `corpo`, `orbita`, `nomai`, `perigo`, `viajante`) e exatamente 5 `dicas` (da mais vaga à mais específica). O modo Locais usa a 2ª e a 4ª como dicas extras. Vale tanto para corpos celestes quanto para lugares dentro deles (cidades, acampamentos, ilhas, ruínas).
 - **Personagem novo:** adicione em `PERSONAGENS` com os 5 atributos e 2 `dicas`. O campo `local` deve ser o `nome` de um local existente.
 - **Conteúdo de DLC:** marque com `dlc: true`. Só aparece com *Echoes of the Eye* ligado nas configurações e nunca é alvo do desafio diário.
-- **Apelidos:** o campo `alias` aceita nomes alternativos pra busca (ex.: "Gêmea de Cinzas" para Ash Twin).
+- **Apelidos:** o campo `alias` aceita nomes alternativos pra busca (ex.: "Ash Twin" e "Gêmea de Cinzas" para Gêmeo Cinzento). Os nomes principais seguem a tradução oficial do jogo em pt-BR (Recanto Lenhoso, Gêmeo Cálido, Vale Incerto, Abrolho Sombrio, Xereta etc.); os nomes em inglês ficam como apelidos.
 
 Atenção: mudar a quantidade de itens de um modo altera a sequência de alvos diários daquele modo.
 

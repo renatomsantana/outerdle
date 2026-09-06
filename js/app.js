@@ -116,13 +116,13 @@
 
   /* ---------- modos ---------- */
   const MODES = [
-    { id: "locais", emoji: "🪐", label: "Locais", kind: "grid", items: LOCAIS, cols: COLS_LOCAIS,
+    { id: "locais", label: "Locais", kind: "grid", items: LOCAIS, cols: COLS_LOCAIS,
       title: "Adivinhe o local de hoje", sub: "Digite qualquer corpo celeste pra começar", placeholder: "Nome do local...",
       hintIdx: [1, 3] },
-    { id: "personagens", emoji: "🎻", label: "Personagens", kind: "grid", items: PERSONAGENS, cols: COLS_PERSONAGENS,
+    { id: "personagens", label: "Personagens", kind: "grid", items: PERSONAGENS, cols: COLS_PERSONAGENS,
       title: "Adivinhe o personagem de hoje", sub: "Hearthianos, Nomai e quem mais estiver por aí", placeholder: "Nome do personagem...",
       hintIdx: [0, 1] },
-    { id: "diario", emoji: "📓", label: "Diário", kind: "hints", items: LOCAIS,
+    { id: "diario", label: "Diário", kind: "hints", items: LOCAIS,
       title: "De onde é esse registro?", sub: "Cada erro revela uma nova entrada do diário de bordo", placeholder: "Nome do local..." }
   ];
   const modeById = id => MODES.find(m => m.id === id) || MODES[0];
@@ -266,7 +266,7 @@
       const st = dailyGame(m).status;
       const dot = st === "playing" ? "" : `<i class="dot ${st}" title="${st === "won" ? "Concluído hoje" : "Encerrado hoje"}"></i>`;
       return `<button class="mode ${m.id === modeId ? "on" : ""}" data-mode="${m.id}" role="tab" aria-selected="${m.id === modeId}">
-        <span class="em">${m.emoji}</span>${m.label}${dot}</button>`;
+        ${m.label}${dot}</button>`;
     }).join("");
   }
 
@@ -290,7 +290,7 @@
     html += m.cols.map(c => `<div class="head" role="columnheader" title="${esc(c.title || "")}">${esc(c.l)}</div>`).join("");
     [...g.guesses].reverse().forEach((it, ri) => {
       const isNew = animate && ri === 0;
-      html += `<div class="row" role="row"><div class="tile name" role="cell">${it.emoji ? `<span class="em">${it.emoji}</span>` : ""}${esc(it.nome)}</div>`;
+      html += `<div class="row" role="row"><div class="tile name" role="cell">${esc(it.nome)}</div>`;
       m.cols.forEach((c, ci) => {
         const r = compare(c, it[c.k], g.target[c.k]);
         const style = isNew ? `style="animation-delay:${ci * 0.12}s"` : `style="animation:none"`;
@@ -320,7 +320,7 @@
     html += `<div class="log">${g.target.dicas.map((d, i) => {
       const open = i < shown, isNew = animate && open && i === shown - 1 && !done;
       return `<div class="entry ${open ? "" : "locked"} ${isNew ? "new" : ""}">
-        <b>Registro ${i + 1}</b><span>${open ? esc(d) : "🔒 Libera após a próxima tentativa"}</span></div>`;
+        <b>Registro ${i + 1}</b><span>${open ? esc(d) : "Libera após a próxima tentativa"}</span></div>`;
     }).join("")}</div>`;
 
     if (n) html += `<div class="chips">${g.guesses.map(it =>
@@ -339,7 +339,7 @@
     const max = maxTries(m);
     const head = max ? `${g.status === "won" ? n : "X"}/${max}` : plural(n, "tentativa", "tentativas");
     const star = settings.hard ? " ★" : "";
-    return `Outerdle ${m.emoji} ${m.label} #${g.day + 1} — ${head}${star}\n${emojiRows(g)}\n#Outerdle #OuterWilds`;
+    return `Outerdle ${m.label} #${g.day + 1} — ${head}${star}\n${emojiRows(g)}\n#Outerdle #OuterWilds`;
   }
   function siteURL() {
     if (!location.protocol.startsWith("http")) return "";
@@ -355,13 +355,12 @@
         <div><b>${s.streak}</b>dias seguidos</div>
         <div><b>${s.wins}</b>${s.wins === 1 ? "vitória" : "vitórias"}</div></div>`;
     const actions = g.free
-      ? `<button class="btn" id="res-new">🎲 Novo alvo</button><button class="btn ghost" id="res-daily">Voltar pro desafio do dia</button>`
+      ? `<button class="btn" id="res-new">Novo alvo</button><button class="btn ghost" id="res-daily">Voltar pro desafio do dia</button>`
       : isToday(g)
         ? `<button class="btn" id="res-share">Compartilhar</button><button class="btn ghost" id="res-free">Jogar modo livre</button>`
         : `<button class="btn" id="res-share">Compartilhar</button><button class="btn ghost" id="res-archive">Outro dia do arquivo</button><button class="btn ghost" id="res-today">Voltar pra hoje</button>`;
     result.innerHTML = `
       <div class="res-head ${won ? "won" : "lost"}">
-        <span class="big">${t.emoji || (won ? "🎉" : "💥")}</span>
         <h2>${won ? (g.revealed ? "Revelado" : "Acertou!") : g.revealed ? "Revelado" : "Não foi dessa vez"}</h2>
       </div>
       <p class="name">${esc(t.nome)}</p>
@@ -400,7 +399,7 @@
     }).join("");
     return `
       <h3>Arquivo</h3>
-      <div class="chips tabs">${MODES.map(x => `<button class="chip ${x.id === id ? "on" : ""}" data-archive="${x.id}">${x.emoji} ${x.label}</button>`).join("")}</div>
+      <div class="chips tabs">${MODES.map(x => `<button class="chip ${x.id === id ? "on" : ""}" data-archive="${x.id}">${x.label}</button>`).join("")}</div>
       <p class="small">Jogue qualquer dia desde o lançamento. Dias anteriores ficam salvos, mas só o de hoje entra nas estatísticas.</p>
       ${dayIndex <= 0 ? `<p class="small">Hoje é o primeiro dia. Volte amanhã e o arquivo começa a crescer.</p>` : ""}
       <div class="days">${rows}</div>`;
@@ -419,7 +418,7 @@
     viewDay = dayIndex; free = false;
     input.value = ""; closeList(); closeModal();
     render();
-    toast("🌅 Meia-noite! Novo desafio disponível.");
+    toast("Meia-noite! Novo desafio disponível.");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   setInterval(tickClock, 1000);
@@ -492,7 +491,7 @@
     const items = poolFor(g.mode).filter(i => !g.guesses.includes(i) && match(i))
       .sort((a, b) => starts(a) - starts(b) || a.nome.localeCompare(b.nome, "pt"));
     list.innerHTML = items.map(i =>
-      `<div role="option" data-id="${i.id}"><span class="em">${i.emoji || "•"}</span><span class="nm">${esc(i.nome)}</span>${i.dlc ? `<small>DLC</small>` : ""}</div>`).join("");
+      `<div role="option" data-id="${i.id}"><span class="nm">${esc(i.nome)}</span>${i.dlc ? `<small>DLC</small>` : ""}</div>`).join("");
     list.style.display = items.length ? "block" : "none";
     sel = -1;
   }
@@ -538,14 +537,14 @@
 
   function helpHTML() {
     return `
-      <img class="art" src="assets/riebeck.jpg" alt="Riebeck tocando banjo em Brittle Hollow" loading="lazy">
+      <img class="art" src="assets/riebeck.jpg" alt="Riebeck tocando banjo no Vale Incerto" loading="lazy">
       <h3>Como jogar</h3>
       <p>Todo dia tem um desafio novo em cada modo. O progresso fica salvo neste navegador.</p>
-      <h4>🪐 Locais</h4>
+      <h4>Locais</h4>
       <p>Chute um corpo celeste. Cada coluna mostra se aquele atributo bate com o local do dia. Tentativas ilimitadas${settings.hard ? ", sem dicas extras" : `, e dicas extras aparecem depois da ${hintsAt()[0]}ª e da ${hintsAt()[1]}ª`}.</p>
-      <h4>🎻 Personagens</h4>
+      <h4>Personagens</h4>
       <p>Mesma ideia, mas com Hearthianos e Nomai: espécie, local, papel, instrumento e status.</p>
-      <h4>📓 Diário</h4>
+      <h4>Diário</h4>
       <p>Você recebe um registro do diário de bordo e tem ${maxTries(MODES[2])} tentativas pra dizer de que lugar ele fala. Cada erro libera um registro novo, mais específico que o anterior.</p>
       <div class="legend">
         <span><i style="background:var(--ok)"></i> Correto</span>
@@ -564,7 +563,7 @@
     const pct = s.played ? Math.round(s.wins / s.played * 100) : 0;
     return `
       <h3>Estatísticas</h3>
-      <div class="chips tabs">${MODES.map(x => `<button class="chip ${x.id === id ? "on" : ""}" data-stats="${x.id}">${x.emoji} ${x.label}</button>`).join("")}</div>
+      <div class="chips tabs">${MODES.map(x => `<button class="chip ${x.id === id ? "on" : ""}" data-stats="${x.id}">${x.label}</button>`).join("")}</div>
       <div class="stats">
         <div><b>${s.played}</b>${s.played === 1 ? "jogo" : "jogos"}</div>
         <div><b>${pct}%</b>vitórias</div>
