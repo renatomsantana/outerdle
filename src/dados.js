@@ -1,25 +1,18 @@
-/* =====================================================================
-   Outerdle — conteúdo (versão legível)
-   Edite AQUI e depois rode:  node tools/build.js
-   Esse comando valida os campos e gera js/data.js (codificado).
-   ===================================================================== */
+// Conteúdo do jogo. Depois de editar, rode: node tools/build.js
 window.OUTERDLE_DATA = (() => {
   "use strict";
 
-  /* ---------------------------------------------------------------
-     LOCAIS
-     tipo    : categoria do lugar (Planeta, Lua, Cidade, Acampamento...)
-     corpo   : corpo celeste onde fica (ou que orbita). Corpos = eles mesmos.
-     orbita  : posição do corpo a partir do Sol (0 = Sol, null = varia)
-     nomai   : "Sim" (estrutura importante), "Ruínas" (só vestígios), "Não"
-     perigo  : principal ameaça no lugar
-     viajante: quem acampa ali (Nenhum se ninguém)
-     dicas   : 5 registros de diário, do mais vago ao mais específico.
-               O modo Locais usa o 2º e o 4º como dicas extras.
-     dlc     : true = só aparece com "Echoes of the Eye" ligado
-     --------------------------------------------------------------- */
+  // LOCAIS
+  //   corpo    corpo celeste onde fica (planetas/luas apontam pra si mesmos)
+  //   orbita   posição a partir do Sol; null = varia (Lua Quântica)
+  //   nomai    "Sim" (estrutura ativa), "Ruínas" ou "Não"
+  //   viajante quem acampa ali
+  //   dicas    5 frases nossas, da mais vaga à mais específica; o modo Locais usa a 2ª e a 4ª
+  //   diario   registros reais do diário de bordo (tradução oficial pt-BR), 3 a 6.
+  //            Sem esse campo o lugar fica fora do modo Diário.
+  //   dlc      só aparece com Echoes of the Eye ligado
   const LOCAIS = [
-    /* ======================= SOL ======================= */
+    // Sol
     { id:"sol", nome:"Sol", alias:["Sun","The Sun","O Sol"],
       tipo:"Estrela", corpo:"Sol", orbita:0, nomai:"Não", perigo:"Calor", viajante:"Nenhum",
       desc:"A estrela do sistema. Está velha, inchada e prestes a fazer algo dramático.",
@@ -30,7 +23,7 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Nada aqui saiu como o planejado.","Fico onde nenhuma nave deveria conseguir chegar.","Você só chega em mim por um caminho que não é a sua nave.","Fui construída pra forçar o Sol a fazer algo que ele ainda não estava pronto pra fazer.","Pye escreveu nas minhas paredes que eu era um fracasso."],
       diario:["Há um modo seguro de viajar do Gêmeo Cinzento até a Estação Solar.","Os Nomai discutiram sobre construir uma Estação Solar a fim de energizar o Projeto do Gêmeo Cinzento.","Os Nomai construíram algo chamado de Estação Solar, mas nem todos aprovaram sua construção.","A Estação Solar foi desenvolvida para forçar o sol a ser uma supernova.","Os Nomai dispararam a Estação Solar, mas não afetou o sol. Eles concluíram que a Estação Solar nunca conseguiria levar o sol a ser uma supernova.","Após a Estação Solar falhar, os Nomai deram uma pausa para investigar o cometa recém-chegado."] },
 
-    /* ======================= EMBER TWIN ======================= */
+    // Gêmeo Cálido
     { id:"ember-twin", nome:"Gêmeo Cálido", alias:["Gêmea de Brasa","Gêmea de Brasas","Ember","Ember Twin"],
       tipo:"Planeta", corpo:"Gêmeo Cálido", orbita:2, nomai:"Sim", perigo:"Areia", viajante:"Cherte",
       desc:"A gêmea que recebe areia. Cavernas, uma cidade escondida e Cherte no topo.",
@@ -66,7 +59,7 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Fico de olho em algo que muda de lugar.","Sou um mapa do sistema com uma marca que anda sozinha.","Mostro em qual planeta a lua está agora.","Fui feito pelos Nomai pra planejar peregrinações.","Fico na superfície do Gêmeo Cálido, perto do polo norte."],
       diario:["Um dispositivo Nomai criado para rastrear a localização da Lua Quântica.","Segundo os Nomai, a Lua Quântica deve ser alguma forma de mecânica quântica macroscópica.","A Lua Quântica vaga por cinco locais ao todo."] },
 
-    /* ======================= ASH TWIN ======================= */
+    // Gêmeo Cinzento
     { id:"ash-twin", nome:"Gêmeo Cinzento", alias:["Gêmea de Cinzas","Ash","Ash Twin"],
       tipo:"Planeta", corpo:"Gêmeo Cinzento", orbita:2, nomai:"Sim", perigo:"Areia", viajante:"Nenhum",
       desc:"A gêmea que perde areia. Torres de dobra e um projeto secreto no núcleo.",
@@ -81,7 +74,7 @@ window.OUTERDLE_DATA = (() => {
       desc:"Torres alinhadas no equador do Gêmeo Cinzento. Cada uma tem a forma do mundo pra onde leva.",
       dicas:["Cada uma de nós tem a forma do lugar pra onde leva.","Pisar em cima na hora certa te leva pra outro mundo.","Ficamos alinhadas no equador de um planeta.","A areia nos cobre e descobre ao longo do ciclo.","Ficamos no Gêmeo Cinzento."] },
 
-    /* ======================= TIMBER HEARTH ======================= */
+    // Recanto Lenhoso
     { id:"timber-hearth", nome:"Recanto Lenhoso", alias:["Timber","Timber Hearth"],
       tipo:"Planeta", corpo:"Recanto Lenhoso", orbita:3, nomai:"Ruínas", perigo:"Matéria fantasma", viajante:"Nenhum",
       desc:"Casa. Gêiseres, pinheiros, uma vila na cratera e uma plataforma de lançamento.",
@@ -114,7 +107,7 @@ window.OUTERDLE_DATA = (() => {
       desc:"Uma torre de madeira com um elevador. Sua nave está lá em cima, e Ardósia lá embaixo.",
       dicas:["Foi de onde tudo começou, pra você.","Um elevador de madeira leva até o meu topo.","Ardósia fica na minha base, sempre mexendo em algo.","Sua nave está estacionada em mim, se você ainda não decolou.","Fico na vila."] },
 
-    /* ======================= ATTLEROCK ======================= */
+    // Pedra de Lia
     { id:"attlerock", nome:"Pedra de Lia", alias:["Lua do Recanto Lenhoso","Attlerock","Pedra de Lia"],
       tipo:"Lua", corpo:"Pedra de Lia", orbita:3, nomai:"Ruínas", perigo:"Nenhum", viajante:"Esker",
       desc:"A lua do Recanto Lenhoso. Pequena, cinzenta e com um único morador.",
@@ -125,7 +118,7 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Sou o acampamento mais perto de casa.","Tenho um telescópio de sinais pra ouvir todo mundo.","Alguém fica aqui assobiando, esperando visita.","Fico numa lua cinzenta.","Esker mora aqui."],
       diario:["Parece que Esker ainda está na Pedra de Lia. Já está lá há algum tempo.","Esker está cultivando mudas de árvores em seu acampamento. Aparentemente está se dando bem lá, mas pode estar só a tempo demais.","Esker diz que o polo norte da Pedra de Lia (marcado em vermelho no minimapa) é um ótimo lugar para escutar a música dos demais viajantes com um onduloscópio.","Uma plataforma de observação com uma vista espetacular do sistema solar. Esker usa seu onduloscópio aqui para ficar de olho nos outros viajantes."] },
 
-    /* ======================= BRITTLE HOLLOW ======================= */
+    // Vale Incerto
     { id:"brittle-hollow", nome:"Vale Incerto", alias:["Brittle","Brittle Hollow"],
       tipo:"Planeta", corpo:"Vale Incerto", orbita:4, nomai:"Sim", perigo:"Buraco negro", viajante:"Riebeck",
       desc:"Um planeta desmoronando num buraco negro, com uma cidade pendurada sob a crosta.",
@@ -171,13 +164,13 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Fico embaixo da crosta, num pedaço que ainda não caiu.","Um banjo toca aqui.","Quem acampa em mim não quer voltar voando.","Fico perto de um cruzamento de caminhos Nomai.","Riebeck está aqui."],
       diario:["Riebeck se dirigiu ao Vale Incerto para investigar o que os Nomai faziam no polo sul.","Riebeck aterrissou sua nave próximo à grande cúpula no polo sul. A porta que levava para dentro estava quebrada, então decidiu se dirigir ao norte, até as ruínas no equador, em busca de um caminho por baixo da superfície.","Riebeck descobriu um antigo caminho Nomai próximo ao acampamento no equador. O caminho começa dentro de um prédio em ruínas com árvores crescendo por lá.","Riebeck chegou até as Encruzilhadas e continuou a descer em busca de oxigênio.","Riebeck montou um acampamento no fundo das Encruzilhadas. Sua empolgação por estar em meio a tanta história Nomai só se compara ao medo que sente por buracos negros.","De todo o Recanto Lenhoso, só Riebeck se dedicou à arqueologia. Após superar seu medo do espaço e partir para o Vale Incerto a fim de explorar o imenso tesouro que é a cultura Nomai."] },
 
-    /* ======================= HOLLOW'S LANTERN ======================= */
+    // Luzeiro do Vale
     { id:"hollows-lantern", nome:"Luzeiro do Vale", alias:["Hollows Lantern","Lanterna","Hollow's Lantern","Lanterna do Vale"],
       tipo:"Lua", corpo:"Luzeiro do Vale", orbita:4, nomai:"Não", perigo:"Lava", viajante:"Nenhum",
       desc:"Lua vulcânica que bombardeia o Vale Incerto enquanto encolhe.",
       dicas:["Estou encolhendo.","Fico jogando pedras quentes no vizinho.","Sou uma lua, mas ninguém acampa em mim. Quente demais.","É por minha causa que o chão do planeta ao lado vive desabando.","Orbito o Vale Incerto."] },
 
-    /* ======================= GIANT'S DEEP ======================= */
+    // Profundezas do Gigante
     { id:"giants-deep", nome:"Profundezas do Gigante", alias:["Giants Deep","Giant","Giant's Deep"],
       tipo:"Planeta", corpo:"Profundezas do Gigante", orbita:5, nomai:"Sim", perigo:"Ciclones", viajante:"Gabro",
       desc:"Oceano sem fim, ilhas que voam e ciclones. Gabro aprova.",
@@ -222,7 +215,7 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Disparo uma vez por ciclo.","Uma parte minha já se desprendeu.","Fui construído pra achar um lugar que ninguém conseguia ver.","Orbito o planeta oceânico.","Meu Módulo de Rastreamento afundou no oceano lá embaixo."],
       diario:["Utilizei uma piscina de projeção Nomai e vi o interior de uma estação espacial orbitando o Profundezas do Gigante.","Gabro vê uma luz brilhante no céu no início de cada loop. Algo deve estar acontecendo na órbita do Profundezas do Gigante.","Os restos quebrados de uma estação espacial Nomai orbitando o Profundezas do Gigante. Há três caminhos de acesso partindo da área de comando central.","Os Nomai finalizaram a construção do módulo final do Canhão de Sonda Orbital e o colocaram em órbita em torno do Profundezas do Gigante.","Os Nomai decidiram construir um canhão de sonda para orbitar o Profundezas do Gigante.","O Canhão de Sonda Orbital foi criado para encontrar a localização exata do Olho do Universo."] },
 
-    /* ======================= DARK BRAMBLE ======================= */
+    // Abrolho Sombrio
     { id:"dark-bramble", nome:"Abrolho Sombrio", alias:["Bramble","Dark Bramble","Espinheiro Sombrio"],
       tipo:"Planeta", corpo:"Abrolho Sombrio", orbita:6, nomai:"Ruínas", perigo:"Peixe-pescador", viajante:"Feldspato",
       desc:"Névoa, raízes e peixes-pescadores. Maior por dentro do que por fora.",
@@ -248,7 +241,7 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Estou parada há muito, muito tempo.","Trouxe um povo inteiro até este sistema.","Estou presa em raízes, cercada de névoa.","Meu núcleo de dobra queimou e nunca mais decolei.","Escall e a tripulação atenderam por mim a um sinal mais antigo que o universo."],
       diario:["Eu lancei meu batedor na semente no Túmulo Nomai e tirei fotos de uma enorme nave Nomai abandonada.","Os Nomai se transportaram para esse sistema solar em uma espaçonave chamada o Hospedeiro. Eles tentaram seguir o sinal vindo do Olho do Universo.","O Hospedeiro caiu em algum lugar no Abrolho sombrio.","O núcleo de transportação do O Hospedeiro se quebrou com a queda da nave no Abrolho Sombrio.","Encontrei o Hospedeiro Nomai abandonado bem dentro do Abrolho Sombrio.","O núcleo de transportação do O Hospedeiro já morreu há muito tempo."] },
 
-    /* ======================= THE INTERLOPER ======================= */
+    // Xereta
     { id:"interloper", nome:"Xereta", alias:["Cometa","O Intruso","The Interloper","Interloper"],
       tipo:"Cometa", corpo:"Xereta", orbita:7, nomai:"Ruínas", perigo:"Matéria fantasma", viajante:"Nenhum",
       desc:"Cometa gelado com um passageiro mortal escondido no núcleo.",
@@ -264,14 +257,14 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Sou um veículo pequeno, estacionado num visitante gelado.","Fui trazido por dois cientistas curiosos.","Dá pra me chamar de volta com um canhão de gravidade.","Estou parado na superfície de um cometa.","Poke e Clary vieram em mim."],
       diario:["Encontrei uma exploradora Nomai quase que completamente congelada.","Os Nomai pousaram no Xereta logo após a sua chegada ao nosso sistema solar. O equipamento da exploradora captou estranhas leituras vindas de algum lugar sob a superfície.","Havia três Nomai a bordo da exploradora. Uma delas ficou para trás para manter a exploradora aquecida enquanto as outras duas exploraram o Xereta.","Clary, a Nomai que ficou para trás, perdeu contato com as outras duas assim que desceram abaixo da superfície do Xereta."] },
 
-    /* ======================= WHITE HOLE ======================= */
+    // Estação do Buraco Branco
     { id:"white-hole-station", nome:"Estação do Buraco Branco", alias:["Estação Buraco Branco","White Hole","White Hole Station"],
       tipo:"Estação", corpo:"Estação do Buraco Branco", orbita:8, nomai:"Sim", perigo:"Nenhum", viajante:"Nenhum",
       desc:"Onde você aparece depois de cair no buraco negro. Tem caminho de volta.",
       dicas:["Você provavelmente chegou aqui sem querer.","Estou do outro lado de um buraco.","Fico no limite do sistema, longe de tudo.","Sirvo de rota de volta pra quem caiu.","Meu núcleo de dobra te devolve pro Vale Incerto."],
       diario:["Muitos Nomai retornaram à estação para investigar a leitura do equipamento que registrava uma violação à causalidade.","Todas as torres de translação Nomai estão sintonizadas a um corpo astral específico.","Para usar uma torre, você precisa estar sobre a plataforma durante o alinhamento da torre com seu corpo astral correspondente (o alinhamento ocorre quando o corpo astral está diretamente acima de você).","Há uma Estação do Buraco Branco do lado oposto ao buraco negro do Vale Incerto.","Os experimentos no Laboratório de Alta Energia foram baseados em achados surpreendentes da Estação do Buraco Branco.","As torres no Gêmeo Cinzento foram feitas no molde da Estação do Buraco Branco."] },
 
-    /* ======================= QUANTUM MOON ======================= */
+    // Lua Quântica
     { id:"quantum-moon", nome:"Lua Quântica", alias:["Quantum","Quantum Moon"],
       tipo:"Lua", corpo:"Lua Quântica", orbita:null, nomai:"Sim", perigo:"Nenhum", viajante:"Solanum",
       desc:"A lua que só existe onde alguém observa. Solanum espera lá.",
@@ -283,16 +276,14 @@ window.OUTERDLE_DATA = (() => {
       dicas:["Sirvo pra viajar sem sair do lugar.","Feche a porta, apague a luz e olhe de novo.","Fico no polo sul de uma lua que anda.","Sou a chave pra chegar ao sexto lugar.","Fico na Lua Quântica."],
       diario:["“Lembre-se da lei da sexta localização” está inscrito próximo a um mural de uma torre suspensa sobre um buraco negro.","Os Nomai construíram um templo na Lua Quântica para ajudá-los na peregrinação até a sexta localização.","Um templo Nomai que vaga em volta da Lua Quântica.","“Você se lembrou da lei do pensamento quântico” está inscrito próximo a um mural de uma torre na ilha.","“Lembre-se da lei da confusão quântica” está inscrito próximo a um mural de um fragmento quântico na caverna."] },
 
-    /* ======================= DLC ======================= */
+    // DLC (Echoes of the Eye)
     { id:"stranger", nome:"O Desconhecido", alias:["O Estranho","Stranger","Forasteiro","The Stranger","Estranho"], dlc:true,
       tipo:"Nave", corpo:"O Desconhecido", orbita:9, nomai:"Não", perigo:"Escuridão", viajante:"Nenhum",
       desc:"Um anel escondido na luz do Sol, cheio de água, escuridão e segredos. (Echoes of the Eye)",
       dicas:["Você não me vê, mas eu estou lá.","Por fora sou só uma sombra no Sol. Por dentro, um rio inteiro.","Meus habitantes vieram de longe pra silenciar um sinal.","Meus moradores dormem e sonham num lugar sem luz.","Cheguei junto com a expansão Echoes of the Eye."] }
   ];
 
-  /* Colunas da grade do modo Locais.
-     type "num"  → compara números e mostra seta
-     near        → grupos de valores que contam como "parcial" */
+  // Colunas da grade. type:"num" compara e mostra seta; near = grupos que dão "parcial".
   const COLS_LOCAIS = [
     { k:"tipo",     l:"Tipo" },
     { k:"corpo",    l:"Corpo",  title:"Corpo celeste onde fica",
@@ -303,17 +294,10 @@ window.OUTERDLE_DATA = (() => {
     { k:"viajante", l:"Viajante" }
   ];
 
-  /* ---------------------------------------------------------------
-     PERSONAGENS
-     especie    : Lenhoso, Nomai, Outro
-     local      : corpo celeste onde a pessoa é encontrada (nome de um LOCAL)
-     papel      : o que faz
-     instrumento: só os viajantes (e Gneiss) tocam algo
-     status     : Vivo / Morto (no começo do ciclo)
-     dicas      : 2 dicas, liberadas junto com as dicas extras
-     --------------------------------------------------------------- */
+  // PERSONAGENS: local precisa ser o nome de um item de LOCAIS (o build confere).
+  //   status é no começo do ciclo. dicas: 2 frases, liberadas junto com as dicas extras.
   const PERSONAGENS = [
-    /* ---- Lenhosos ---- */
+    // Lenhosos
     { id:"slate", nome:"Ardósia", alias:["Ardósia"], especie:"Lenhoso", local:"Recanto Lenhoso", papel:"Engenharia", instrumento:"Nenhum", status:"Vivo",
       desc:"Construiu a sua nave (e quase todas as outras) e garante que o para-brisa aguenta.",
       dicas:["Fica perto da plataforma de lançamento, sempre mexendo em alguma coisa.","Se algo quebrar na sua nave, a culpa é de quem construiu."] },
@@ -372,7 +356,7 @@ window.OUTERDLE_DATA = (() => {
       desc:"Trabalha na mina e sabe onde tem matéria fantasma.",
       dicas:["Fica na entrada de uma mina.","Avisa sobre um perigo invisível lá dentro."] },
 
-    /* ---- Nomai ---- */
+    // Nomai
     { id:"solanum", nome:"Solanum", especie:"Nomai", local:"Lua Quântica", papel:"Peregrina", instrumento:"Nenhum", status:"Vivo",
       desc:"A última Nomai que você pode encontrar. Se olhar no lugar certo.",
       dicas:["Está esperando visita num lugar que muda de lugar.","Conversa com você escrevendo no chão."] },
@@ -413,7 +397,7 @@ window.OUTERDLE_DATA = (() => {
       desc:"Saiu do Pod 3 a pé, no escuro, deixando uma trilha de luzes pra quem viesse depois.",
       dicas:["Veio no pod que caiu no pior lugar possível.","Deixou um caminho de luzes pra guiar os outros."] },
 
-    /* ---- DLC ---- */
+    // DLC
     { id:"prisioneiro", nome:"Prisioneiro", alias:["Prisoner","The Prisoner","O Prisioneiro"], especie:"Outro", local:"O Desconhecido", papel:"Prisioneiro", instrumento:"Nenhum", status:"Vivo", dlc:true,
       desc:"Trancado há eras por ter feito o que achou certo. (Echoes of the Eye)",
       dicas:["Está preso há mais tempo do que qualquer um consegue lembrar.","Se comunica sem palavras, com uma lanterna."] }

@@ -1,7 +1,6 @@
-/* Outerdle — service worker
-   Estratégia: tenta a rede primeiro (pra pegar atualizações) e cai pro cache
-   quando estiver offline. Troque a versão abaixo ao publicar mudanças grandes. */
-const CACHE = "outerdle-v7";
+// Service worker: rede primeiro, cache só quando estiver offline.
+// Subir a versão abaixo invalida o cache antigo nos celulares.
+const CACHE = "outerdle-v8";
 const FILES = [
   "./",
   "./index.html",
@@ -30,10 +29,20 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
-  if (url.origin !== location.origin) return;             // fontes externas seguem direto
+  if (url.origin !== location.origin) return; // fontes do Google etc. seguem direto
   e.respondWith(
     fetch(e.request)
-      .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return res; })
-      .catch(() => caches.match(e.request, { ignoreSearch: true }).then(r => r || caches.match("./index.html")))
+      .then(res => {
+        // não guarda 404/500 no cache, senão fica servindo erro offline
+        if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
+        return res;
+      })
+      .catch(async () => {
+        const hit = await caches.match(e.request, { ignoreSearch: true });
+        if (hit) return hit;
+        // só navegação cai no index; css/js/imagem que faltou vira erro mesmo
+        if (e.request.mode === "navigate") return caches.match("./index.html");
+        return Response.error();
+      })
   );
 });

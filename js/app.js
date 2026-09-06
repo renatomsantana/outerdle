@@ -1,11 +1,8 @@
-/* =====================================================================
-   Outerdle — motor do jogo
-   ===================================================================== */
+// Outerdle: lógica do jogo. Sem dependências, roda direto no navegador.
 (() => {
   "use strict";
 
-  /* Conteúdo: js/data.js é gerado por tools/build.js a partir de src/dados.js.
-     Decodificado só em memória; nada fica em variável global. */
+  // js/data.js (gerado por tools/build.js) vem ofuscado; decodifica e apaga o global.
   function loadData() {
     const blob = window.__ow; delete window.__ow;
     if (typeof blob !== "string") return null;
@@ -23,7 +20,6 @@
   }
   const { LOCAIS, COLS_LOCAIS, PERSONAGENS, COLS_PERSONAGENS } = DATA;
 
-  /* ---------- utilidades ---------- */
   const $  = (s, r = document) => r.querySelector(s);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   const norm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -31,13 +27,12 @@
 
   const store = {
     get(k, d = null) { try { const v = localStorage.getItem("outerdle:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-    set(k, v) { try { localStorage.setItem("outerdle:" + k, JSON.stringify(v)); } catch { /* sem storage */ } },
-    clear() { try { Object.keys(localStorage).filter(k => k.startsWith("outerdle:")).forEach(k => localStorage.removeItem(k)); } catch { /* sem storage */ } }
+    set(k, v) { try { localStorage.setItem("outerdle:" + k, JSON.stringify(v)); } catch {} },
+    clear() { try { Object.keys(localStorage).filter(k => k.startsWith("outerdle:")).forEach(k => localStorage.removeItem(k)); } catch {} }
   };
 
-  /* ---------- dia ---------- */
-  const EPOCH = Date.UTC(2026, 8, 6);                       // 6 de setembro de 2026 = Outerdle #1
-  /* O dia vira à meia-noite no horário local do jogador. */
+  const EPOCH = Date.UTC(2026, 8, 6); // dia #1
+  // Vira à meia-noite local, por isso a data local é convertida pra UTC antes de subtrair.
   function todayIndex() {
     const n = new Date();
     return Math.round((Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) - EPOCH) / 864e5);
@@ -53,7 +48,7 @@
     return [s / 3600, s % 3600 / 60, s % 60].map(x => String(Math.floor(x)).padStart(2, "0")).join(":");
   }
 
-  /* ---------- sorteio determinístico ---------- */
+  // PRNG determinístico: todo mundo vê o mesmo alvo no mesmo dia.
   function mulberry32(a) {
     return () => {
       a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -72,10 +67,8 @@
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
     return a;
   }
-  /* Cada "época" de N dias percorre todos os itens sem repetir.
-     Na virada de época, os itens que saíram nos últimos N/4 dias não podem
-     aparecer nos primeiros N/4 dias da época seguinte. Assim o intervalo
-     mínimo entre repetições fica em torno de N/4 dias e o típico em N dias. */
+  // A cada N dias embaralha o pool de novo. Os últimos N/4 itens da época anterior
+  // não podem cair nos primeiros N/4 da seguinte, senão repete rápido demais.
   const permCache = {};
   function epochPerm(pool, modeId, epoch) {
     const ck = `${modeId}:${epoch}:${pool.length}`;
@@ -97,8 +90,7 @@
     const n = pool.length, epoch = Math.floor(day / n), pos = ((day % n) + n) % n;
     return epochPerm(pool, modeId, epoch)[pos];
   }
-  /* Se dois modos sorteariam o mesmo item no mesmo dia, o segundo pega um
-     substituto que não apareça nem nos k dias anteriores nem nos k seguintes. */
+  // Locais e Diário não podem cair no mesmo lugar no mesmo dia.
   function dailyTarget(pool, modeId, day, avoid) {
     const t = seqItem(pool, modeId, day), n = pool.length;
     if (!avoid || t !== avoid || n < 2) return t;
@@ -114,7 +106,6 @@
   }
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
-  /* ---------- modos ---------- */
   const MODES = [
     { id: "locais", label: "Locais", kind: "grid", items: LOCAIS, cols: COLS_LOCAIS,
       title: "Adivinhe o local de hoje", sub: "Pode estar em qualquer corpo celeste", placeholder: "Nome do local...",
@@ -127,9 +118,7 @@
   ];
   const modeById = id => MODES.find(m => m.id === id) || MODES[0];
 
-  /* ---------- configurações ---------- */
   const settings = Object.assign({ dlc: false, contrast: false, anim: true, seenHelp: false, hard: false, helper: false }, store.get("settings", {}));
-  /* dificuldade: no modo difícil não há dicas extras e o Diário tem menos tentativas */
   const hintsAt = () => settings.hard ? [] : [4, 6];
   const maxTries = m => m.kind === "hints" ? (settings.hard ? 4 : 6) : 0;
   function applySettings() {
@@ -138,11 +127,10 @@
   }
   function saveSettings() { store.set("settings", settings); applySettings(); }
 
-  /* ---------- estado ---------- */
   let modeId = store.get("mode", "locais");
   if (!MODES.some(m => m.id === modeId)) modeId = "locais";
   let free = false;
-  let viewDay = dayIndex;                                   // dia sendo jogado (arquivo permite dias anteriores)
+  let viewDay = dayIndex; // pode ser um dia antigo via arquivo
   const daily = {}, freeGames = {};
 
   const poolFor = mode => mode.items.filter(i => !i.dlc || settings.dlc);
@@ -174,7 +162,6 @@
   }
   const isToday = g => !g.free && g.day === dayIndex;
 
-  /* Quantos itens ainda são compatíveis com todas as respostas até agora */
   function candidates(g) {
     const m = g.mode;
     return poolFor(m).filter(c => g.guesses.every(it => m.cols.every(col => {
@@ -183,11 +170,10 @@
     })));
   }
 
-  /* ---------- estatísticas ---------- */
   const statsOf = id => Object.assign({ played: 0, wins: 0, streak: 0, max: 0, last: null, dist: {} }, store.get("stats:" + id, {}));
   function record(g) {
     const s = statsOf(g.mode.id);
-    if (s.last === dayIndex) return;                         // já contabilizado
+    if (s.last === dayIndex) return;
     const won = g.status === "won", n = g.guesses.length;
     s.played++;
     if (won) { s.wins++; s.streak = s.last === dayIndex - 1 ? s.streak + 1 : 1; s.max = Math.max(s.max, s.streak); }
@@ -198,7 +184,6 @@
     store.set("stats:" + g.mode.id, s);
   }
 
-  /* ---------- comparação ---------- */
   function compare(col, a, b) {
     if (col.type === "num") {
       if (a === null || b === null) return { cls: a === b ? "ok" : "no", text: a === null ? "Varia" : String(a) };
@@ -212,7 +197,6 @@
   }
   const CLS_LABEL = { ok: "correto", near: "parcial", no: "errado" };
 
-  /* ---------- chute ---------- */
   function findItem(mode, q) {
     const nq = norm(q);
     if (!nq) return null;
@@ -234,7 +218,6 @@
     if (g.status === "playing") input.focus();
   }
 
-  /* ---------- render ---------- */
   const input = $("#guess"), goBtn = $("#go"), list = $("#list"), board = $("#board"), result = $("#result");
 
   function render(animate = false) {
@@ -385,7 +368,6 @@
     if (won && !g.revealed && isToday(g)) launchConfetti();
   }
 
-  /* ---------- arquivo ---------- */
   function setDay(day) {
     viewDay = Math.max(0, Math.min(dayIndex, day)); free = false;
     input.value = ""; closeList(); closeModal(); render(); input.focus();
@@ -409,7 +391,6 @@
       <div class="days">${rows}</div>`;
   }
 
-  /* ---------- relógio e virada do dia ---------- */
   function tickClock() {
     const txt = fmtClock(msToMidnight());
     document.querySelectorAll(".cd").forEach(el => { el.textContent = txt; });
@@ -457,12 +438,10 @@
     }
   }
 
-  /* ---------- modo livre ---------- */
   function setFree(v) { free = v; if (!v) viewDay = dayIndex; if (v && !freeGames[modeId]) freeGames[modeId] = makeFree(modeById(modeId)); render(); input.focus(); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function newFree() { freeGames[modeId] = makeFree(modeById(modeId)); render(); input.focus(); }
   function giveUp() { const g = current(); if (!g.free || g.status !== "playing") return; g.status = "lost"; g.revealed = true; render(); }
 
-  /* ---------- feedback visual ---------- */
   let toastTimer = null;
   function toast(msg) {
     const el = $("#toast"); el.textContent = msg; el.classList.add("show");
@@ -485,8 +464,7 @@
     setTimeout(() => wrap.remove(), 3500);
   }
 
-  /* ---------- autocomplete ---------- */
-  let sel = -1;
+  let sel = -1; // item destacado na lista de sugestões
   function openList() {
     const g = current(); if (g.status !== "playing") return closeList();
     const q = norm(input.value);
@@ -501,15 +479,21 @@
   }
   function closeList() { list.style.display = "none"; sel = -1; }
   function submitFromInput() {
-    const first = list.style.display !== "none" ? list.children[sel >= 0 ? sel : 0] : null;
-    guess(first ? first.dataset.id : input.value);
+    // Com um item destacado, vai ele. Senão, nome exato digitado ganha do primeiro da lista
+    // (ex.: "Sun" é apelido do Sol, mas a lista começa em "Estação Solar").
+    const open = list.style.display !== "none";
+    if (open && sel >= 0) return guess(list.children[sel].dataset.id);
+    const exact = findItem(current().mode, input.value);
+    if (exact) return guess(exact.id);
+    guess(open && list.children[0] ? list.children[0].dataset.id : input.value);
   }
 
   input.addEventListener("input", openList);
   input.addEventListener("focus", openList);
   input.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown" && list.style.display === "none") openList();
     const opts = [...list.children];
-    if (e.key === "ArrowDown") { e.preventDefault(); if (list.style.display === "none") openList(); sel = Math.min(sel + 1, opts.length - 1); }
+    if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(sel + 1, opts.length - 1); }
     else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(sel - 1, 0); }
     else if (e.key === "Enter") { e.preventDefault(); submitFromInput(); return; }
     else if (e.key === "Escape") { closeList(); return; }
@@ -521,7 +505,6 @@
   document.addEventListener("click", e => { if (!e.target.closest(".search")) closeList(); });
   goBtn.addEventListener("click", submitFromInput);
 
-  /* ---------- navegação ---------- */
   $("#modes").addEventListener("click", e => {
     const b = e.target.closest("[data-mode]"); if (!b) return;
     modeId = b.dataset.mode; store.set("mode", modeId);
@@ -532,7 +515,6 @@
   $("#btn-new").addEventListener("click", newFree);
   $("#btn-giveup").addEventListener("click", giveUp);
 
-  /* ---------- modais ---------- */
   const modal = $("#modal"), modalBody = $("#modal-body");
   function openModal(html) { modalBody.innerHTML = html; modal.classList.remove("hidden"); modal.querySelector(".close").focus(); }
   function closeModal() { modal.classList.add("hidden"); modalBody.innerHTML = ""; }
@@ -625,17 +607,14 @@
     setDay(Number(d.dataset.day));
   });
 
-  /* atalho: "/" foca o campo de chute */
   document.addEventListener("keydown", e => {
     if (e.key === "/" && document.activeElement !== input && modal.classList.contains("hidden")) { e.preventDefault(); input.focus(); }
   });
 
-  /* PWA: funciona offline quando servido por http(s) */
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-    navigator.serviceWorker.register("sw.js").catch(() => { /* sem service worker, sem problema */ });
+    navigator.serviceWorker.register("sw.js").catch(() => {});
   }
 
-  /* ---------- início ---------- */
   applySettings();
   $("#daynum").textContent = dayNum;
   render(false);

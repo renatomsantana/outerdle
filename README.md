@@ -38,7 +38,7 @@ O arquivo `_headers` já traz os cabeçalhos de segurança para essas plataforma
 - [x] Endereço final (`https://renatomsantana.github.io/outerdle/`) já está no `index.html` (canonical, `og:url`, `og:image`, `twitter:image`). Se mudar de domínio, troque lá.
 - [ ] Teste a prévia em [opengraph.xyz](https://www.opengraph.xyz) ou mandando o link pra você mesmo no WhatsApp.
 - [ ] Se quiser contar visitas, siga o comentário no fim do `index.html` (GoatCounter é grátis e não exige aviso de cookies).
-- [ ] Ao publicar mudanças grandes, aumente a versão em `sw.js` (`outerdle-v7` → `v8`) para os celulares atualizarem o cache.
+- [ ] Ao publicar mudanças grandes, aumente a versão em `sw.js` (`outerdle-v8` → `v9`) para os celulares atualizarem o cache.
 
 ### Para o jogo espalhar
 
