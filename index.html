@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-contrast="0" data-anim="1">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0f1d">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Outerdle: um desafio por dia baseado em Outer Wilds. Adivinhe o local, o personagem ou de onde veio o registro do diário de bordo. Só um fã de verdade acerta de primeira.">
+<meta name="keywords" content="outer wilds, outerdle, wordle, jogo diário, quiz, adivinhe, planetas, nomai, hearthian">
+<title>Outerdle — Adivinhe o local de Outer Wilds</title>
+
+<!-- Redes sociais. Troque SEU-DOMINIO pelo endereço final antes de publicar. -->
+<link rel="canonical" href="https://SEU-DOMINIO/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Outerdle">
+<meta property="og:title" content="Outerdle — um desafio por dia baseado em Outer Wilds">
+<meta property="og:description" content="Adivinhe o local, o personagem ou de onde veio o registro do diário de bordo. Um desafio novo todo dia.">
+<meta property="og:url" content="https://SEU-DOMINIO/">
+<meta property="og:image" content="https://SEU-DOMINIO/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Outerdle — um desafio por dia baseado em Outer Wilds">
+<meta name="twitter:description" content="Adivinhe o local, o personagem ou de onde veio o registro do diário de bordo. Um desafio novo todo dia.">
+<meta name="twitter:image" content="https://SEU-DOMINIO/og.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Outerdle","applicationCategory":"GameApplication","operatingSystem":"Web","inLanguage":"pt-BR","description":"Um desafio por dia baseado em Outer Wilds. Adivinhe o local, o personagem ou de onde veio o registro do diário de bordo.","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="logo">
+      <h1>Outer<b>dle</b></h1>
+      <p>Um desafio por dia, baseado em Outer Wilds</p>
+    </div>
+    <div class="icons">
+      <button class="icon" id="btn-archive" title="Arquivo de dias anteriores" aria-label="Arquivo">📅</button>
+      <button class="icon" id="btn-stats" title="Estatísticas" aria-label="Estatísticas">📊</button>
+      <button class="icon" id="btn-help" title="Como jogar" aria-label="Como jogar">❓</button>
+      <button class="icon" id="btn-settings" title="Configurações" aria-label="Configurações">⚙️</button>
+    </div>
+  </header>
+
+  <nav class="modes" id="modes" role="tablist" aria-label="Modos de jogo"></nav>
+
+  <section class="box game" id="game">
+    <div class="game-head">
+      <div>
+        <h2 id="title">Adivinhe o local de hoje</h2>
+        <p class="sub" id="subtitle"></p>
+      </div>
+      <div class="seg" role="group" aria-label="Tipo de desafio">
+        <button id="seg-daily" class="on">Hoje #<span id="daynum">1</span></button>
+        <button id="seg-free">Livre</button>
+      </div>
+    </div>
+
+    <div class="search">
+      <input id="guess" placeholder="Nome do local..." autocomplete="off" spellcheck="false" aria-label="Seu chute" aria-autocomplete="list">
+      <button id="go">Chutar</button>
+      <div class="list" id="list" role="listbox"></div>
+    </div>
+
+    <div class="free-bar hidden" id="freebar">
+      <button class="btn small ghost" id="btn-new">🎲 Novo alvo</button>
+      <button class="btn small ghost" id="btn-giveup">👁 Revelar</button>
+    </div>
+
+    <div class="free-bar hidden" id="archivebar">
+      <button class="btn small ghost" id="btn-today">📅 Voltar pra hoje</button>
+    </div>
+
+    <div id="board" aria-live="polite"></div>
+  </section>
+
+  <section class="box result hidden" id="result" aria-live="polite"></section>
+
+  <footer>
+    <p>Feito por fãs. Outer Wilds é da Mobius Digital e Annapurna Interactive.</p>
+    <p>Seu progresso fica salvo só neste navegador.</p>
+  </footer>
+</div>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <button class="close" aria-label="Fechar">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<!--
+  Contador de visitas (opcional). Sugestões que respeitam privacidade e não precisam de aviso de cookies:
+  GoatCounter (grátis): crie uma conta em goatcounter.com, e adicione aqui
+    <script data-goatcounter="https://SEU-CODIGO.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+  Depois libere o domínio no CSP lá em cima: script-src ... https://gc.zgo.at ; connect-src ... https://SEU-CODIGO.goatcounter.com
+-->
+
+</body>
+</html>

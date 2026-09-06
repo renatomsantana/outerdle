@@ -1,0 +1,47 @@
+# Publica o Outerdle no GitHub Pages a cada push na branch main.
+# Só os arquivos do site vão pro ar: src/ (conteúdo legível) e tools/ ficam de fora.
+name: Publicar no GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Gerar js/data.js a partir de src/dados.js
+        run: node tools/build.js
+      - name: Montar pasta do site
+        run: |
+          mkdir -p _site/css _site/js
+          cp index.html 404.html icon.svg og.png manifest.webmanifest sw.js robots.txt _headers .nojekyll _site/
+          cp css/style.css _site/css/
+          cp js/app.js js/data.js _site/js/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

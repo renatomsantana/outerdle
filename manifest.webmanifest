@@ -1,0 +1,14 @@
+{
+  "name": "Outerdle",
+  "short_name": "Outerdle",
+  "description": "Um desafio por dia, baseado em Outer Wilds.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0f1d",
+  "theme_color": "#0b0f1d",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
