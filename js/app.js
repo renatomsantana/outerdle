@@ -37,9 +37,21 @@
 
   /* ---------- dia ---------- */
   const EPOCH = Date.UTC(2026, 8, 6);                       // 6 de setembro de 2026 = Outerdle #1
-  const now = new Date();
-  const dayIndex = Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - EPOCH) / 864e5);
-  const dayNum = dayIndex + 1;
+  /* O dia vira à meia-noite no horário local do jogador. */
+  function todayIndex() {
+    const n = new Date();
+    return Math.round((Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) - EPOCH) / 864e5);
+  }
+  let dayIndex = todayIndex();
+  let dayNum = dayIndex + 1;
+  function msToMidnight() {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1) - n;
+  }
+  function fmtClock(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    return [s / 3600, s % 3600 / 60, s % 60].map(x => String(Math.floor(x)).padStart(2, "0")).join(":");
+  }
 
   /* ---------- sorteio determinístico ---------- */
   function mulberry32(a) {
@@ -61,16 +73,44 @@
     return a;
   }
   /* Cada "época" de N dias percorre todos os itens sem repetir.
-     Também evita que o último item de uma época seja o primeiro da seguinte. */
-  function dailyTarget(pool, modeId, day) {
-    const n = pool.length;
-    const epoch = Math.floor(day / n), pos = ((day % n) + n) % n;
+     Na virada de época, os itens que saíram nos últimos N/4 dias não podem
+     aparecer nos primeiros N/4 dias da época seguinte. Assim o intervalo
+     mínimo entre repetições fica em torno de N/4 dias e o típico em N dias. */
+  const permCache = {};
+  function epochPerm(pool, modeId, epoch) {
+    const ck = `${modeId}:${epoch}:${pool.length}`;
+    if (permCache[ck]) return permCache[ck];
+    const n = pool.length, k = Math.floor(n / 4);
     const perm = shuffled(pool, hash(`${modeId}:${epoch}`));
-    if (pos === 0 && n > 1) {
-      const prev = shuffled(pool, hash(`${modeId}:${epoch - 1}`));
-      if (prev[n - 1] === perm[0]) [perm[0], perm[1]] = [perm[1], perm[0]];
+    if (k > 0 && epoch > 0) {
+      const prevTail = new Set(epochPerm(pool, modeId, epoch - 1).slice(n - k));
+      for (let i = 0; i < k; i++) {
+        if (!prevTail.has(perm[i])) continue;
+        for (let j = n - 1; j >= k; j--) {
+          if (!prevTail.has(perm[j])) { [perm[i], perm[j]] = [perm[j], perm[i]]; break; }
+        }
+      }
     }
-    return perm[pos];
+    return (permCache[ck] = perm);
+  }
+  function seqItem(pool, modeId, day) {
+    const n = pool.length, epoch = Math.floor(day / n), pos = ((day % n) + n) % n;
+    return epochPerm(pool, modeId, epoch)[pos];
+  }
+  /* Se dois modos sorteariam o mesmo item no mesmo dia, o segundo pega um
+     substituto que não apareça nem nos k dias anteriores nem nos k seguintes. */
+  function dailyTarget(pool, modeId, day, avoid) {
+    const t = seqItem(pool, modeId, day), n = pool.length;
+    if (!avoid || t !== avoid || n < 2) return t;
+    const k = Math.max(1, Math.floor(n / 4));
+    for (let o = 0; o < n; o++) {
+      const c = seqItem(pool, modeId, day + (n >> 1) + o);
+      if (c === avoid) continue;
+      let ok = true;
+      for (let d = day - k; d <= day + k && ok; d++) if (seqItem(pool, modeId, d) === c) ok = false;
+      if (ok) return c;
+    }
+    return t;
   }
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
@@ -113,7 +153,9 @@
   const fmtDate = day => dayDate(day).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "UTC" });
 
   function makeDaily(mode, day) {
-    const target = dailyTarget(mode.items.filter(i => !i.dlc), mode.id, day);
+    const pool = mode.items.filter(i => !i.dlc);
+    const avoid = mode.id === "diario" ? dailyTarget(LOCAIS.filter(i => !i.dlc), "locais", day) : null;
+    const target = dailyTarget(pool, mode.id, day, avoid);
     const saved = store.get(dayKey(mode, day), []);
     const guesses = (Array.isArray(saved) ? saved : []).map(id => mode.items.find(i => i.id === id)).filter(Boolean);
     return { mode, day, target, guesses, free: false, status: statusOf(mode, guesses, target), revealed: false };
@@ -194,7 +236,6 @@
 
   /* ---------- render ---------- */
   const input = $("#guess"), goBtn = $("#go"), list = $("#list"), board = $("#board"), result = $("#result");
-  let cdTimer = null;
 
   function render(animate = false) {
     const mode = modeById(modeId), g = current();
@@ -209,6 +250,7 @@
     $("#seg-free").classList.toggle("on", free);
     $("#freebar").classList.toggle("hidden", !free);
     $("#archivebar").classList.toggle("hidden", !archive);
+    $("#clock").classList.toggle("hidden", free || archive);
     $("#btn-giveup").disabled = g.status !== "playing";
 
     const playing = g.status === "playing";
@@ -304,7 +346,6 @@
   }
 
   function renderResult(g) {
-    clearInterval(cdTimer);
     if (g.status === "playing") { result.classList.add("hidden"); result.innerHTML = ""; return; }
     const won = g.status === "won", t = g.target, n = g.guesses.length;
     const s = statsOf(g.mode.id);
@@ -328,7 +369,7 @@
       ${g.revealed ? "" : `<pre class="quad" aria-label="Resultado em emojis">${emojiRows(g)}</pre>`}
       <div class="actions">${actions}</div>
       ${g.revealed ? "" : socialHTML(g)}
-      ${isToday(g) ? `<div class="timer">Próximo desafio em <b id="cd">--:--:--</b></div>` : ""}`;
+      ${isToday(g) ? `<div class="timer">Próximo desafio em <b class="cd">${fmtClock(msToMidnight())}</b></div>` : ""}`;
     result.classList.remove("hidden");
 
     $("#res-share")?.addEventListener("click", () => share(g));
@@ -337,7 +378,6 @@
     $("#res-daily")?.addEventListener("click", () => setFree(false));
     $("#res-archive")?.addEventListener("click", () => openModal(archiveHTML(modeId)));
     $("#res-today")?.addEventListener("click", () => setDay(dayIndex));
-    if (isToday(g)) countdown();
     if (won && !g.revealed && isToday(g)) launchConfetti();
   }
 
@@ -365,16 +405,24 @@
       <div class="days">${rows}</div>`;
   }
 
-  function countdown() {
-    const tick = () => {
-      const el = $("#cd"); if (!el) return;
-      const n = new Date(), next = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1);
-      const s = Math.max(0, Math.floor((next - n) / 1000));
-      el.textContent = [s / 3600, s % 3600 / 60, s % 60].map(x => String(Math.floor(x)).padStart(2, "0")).join(":");
-      if (s === 0) location.reload();
-    };
-    tick(); cdTimer = setInterval(tick, 1000);
+  /* ---------- relógio e virada do dia ---------- */
+  function tickClock() {
+    const txt = fmtClock(msToMidnight());
+    document.querySelectorAll(".cd").forEach(el => { el.textContent = txt; });
+    if (todayIndex() !== dayIndex) newDay();
   }
+  function newDay() {
+    dayIndex = todayIndex(); dayNum = dayIndex + 1;
+    Object.keys(daily).forEach(k => delete daily[k]);
+    Object.keys(freeGames).forEach(k => delete freeGames[k]);
+    viewDay = dayIndex; free = false;
+    input.value = ""; closeList(); closeModal();
+    render();
+    toast("🌅 Meia-noite! Novo desafio disponível.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  setInterval(tickClock, 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tickClock(); });
 
   function socialHTML(g) {
     const text = shareText(g), url = siteURL();
@@ -502,7 +550,8 @@
         <span><i style="background:var(--near)"></i> Parcial</span>
         <span><i style="background:var(--no)"></i> Errado</span>
       </div>
-      <p class="small">Na coluna Órbita, <b>↑</b> significa que o alvo está mais longe do Sol que o seu chute, e <b>↓</b> que está mais perto. "Parcial" em Nomai aparece quando um tem estrutura ativa e o outro só ruínas.</p>
+      <p class="small">Na coluna Órbita, <b>↑</b> significa que o alvo está mais longe do Sol que o seu chute, e <b>↓</b> que está mais perto. "Parcial" em Corpo aparece quando planeta e lua são vizinhos (ou as duas gêmeas), e em Nomai quando um tem estrutura ativa e o outro só ruínas.</p>
+      <p class="small">Os locais incluem planetas, luas e também lugares dentro deles: cidades, laboratórios, acampamentos, ilhas e ruínas. Mais de 50 no total.</p>
       <p class="small"><b>Modo livre:</b> alvos aleatórios, quantos quiser, sem afetar as estatísticas. Dá pra ligar os itens de <em>Echoes of the Eye</em> nas configurações.</p>`;
   }
 
@@ -585,5 +634,6 @@
   applySettings();
   $("#daynum").textContent = dayNum;
   render(false);
+  tickClock();
   if (!settings.seenHelp) { openModal(helpHTML()); settings.seenHelp = true; saveSettings(); }
 })();
