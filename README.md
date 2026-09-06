@@ -19,7 +19,7 @@ node tools/build.js
 1. Crie um repositório no GitHub chamado `outerdle` (público).
 2. Na pasta do projeto:
    ```
-   git remote add origin https://github.com/SEU-USUARIO/outerdle.git
+   git remote add origin https://github.com/renatomsantana/outerdle.git
    git push -u origin main
    ```
 3. No GitHub, vá em **Settings → Pages** e em *Source* escolha **GitHub Actions**.
@@ -35,7 +35,7 @@ O arquivo `_headers` já traz os cabeçalhos de segurança para essas plataforma
 
 ### Antes de divulgar
 
-- [ ] Troque `https://SEU-DOMINIO/` no `index.html` pelo endereço final (canonical, `og:url`, `og:image`, `twitter:image`). Sem isso a prévia com imagem não aparece no WhatsApp, X, Discord etc.
+- [x] Endereço final (`https://renatomsantana.github.io/outerdle/`) já está no `index.html` (canonical, `og:url`, `og:image`, `twitter:image`). Se mudar de domínio, troque lá.
 - [ ] Teste a prévia em [opengraph.xyz](https://www.opengraph.xyz) ou mandando o link pra você mesmo no WhatsApp.
 - [ ] Se quiser contar visitas, siga o comentário no fim do `index.html` (GoatCounter é grátis e não exige aviso de cookies).
 - [ ] Ao publicar mudanças grandes, aumente a versão em `sw.js` (`outerdle-v2` → `v3`) para os celulares atualizarem o cache.
