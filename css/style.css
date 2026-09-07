@@ -162,6 +162,10 @@ html[data-anim="0"] .tile,html[data-anim="0"] .entry.new{animation:none !importa
 .chips.tabs .chip{cursor:pointer;color:var(--muted)}
 .chips.tabs .chip.on{color:var(--text);border-color:var(--accent)}
 
+/* foto */
+.photo{margin:4px 0 14px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--bg)}
+.photo img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;transition:filter .4s}
+
 /* resultado */
 .result{text-align:center}
 .res-head{display:flex;flex-direction:column;align-items:center;gap:4px}

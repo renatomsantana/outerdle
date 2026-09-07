@@ -7,7 +7,9 @@ const vm = require("vm");
 const ROOT = path.join(__dirname, "..");
 const SRC = path.join(ROOT, "src", "dados.js");
 const OUT = path.join(ROOT, "js", "data.js");
-const KEY = "vinte-e-dois-minutos-ate-a-supernova"; // mesma chave em js/app.js
+const KEY = "vinte-e-dois-minutos-ate-a-supernova"; // mesma chave em js/app.js e tools/fotos.py
+const crypto = require("crypto");
+const fotoHash = id => crypto.createHash("sha1").update(id + KEY).digest("hex").slice(0, 12);
 
 const sandbox = { window: {} };
 vm.runInNewContext(fs.readFileSync(SRC, "utf8"), sandbox, { filename: "dados.js" });
@@ -21,6 +23,12 @@ for (const l of data.LOCAIS) {
   check(Array.isArray(l.dicas) && l.dicas.length === 2, `${l.id}: precisa de 2 dicas`);
   for (const c of data.COLS_LOCAIS) check(c.k in l, `${l.id}: falta o campo "${c.k}"`);
   if ("diario" in l) check(Array.isArray(l.diario) && l.diario.length >= 3 && l.diario.length <= 6, `${l.id}: diario precisa de 3 a 6 registros`);
+}
+// modo Foto: o local ganha "foto" se tools/fotos.py já gerou assets/fotos/<hash>/5.jpg
+let comFoto = 0;
+for (const l of data.LOCAIS) {
+  const h = fotoHash(l.id);
+  if (fs.existsSync(path.join(ROOT, "assets", "fotos", h, "5.jpg"))) { l.foto = h; comFoto++; } else delete l.foto;
 }
 const locais = new Set(data.LOCAIS.map(l => l.nome));
 for (const p of data.PERSONAGENS) {
@@ -39,4 +47,4 @@ const blob = bytes.toString("base64");
 
 const out = `/* Outerdle — conteúdo gerado por tools/build.js. Edite src/dados.js, não este arquivo. */\nwindow.__ow=${JSON.stringify(blob)};\n`;
 fs.writeFileSync(OUT, out);
-console.log(`✓ js/data.js gerado (${data.LOCAIS.length} locais, ${data.LOCAIS.filter(l => l.diario).length} com diário, ${data.PERSONAGENS.length} personagens, ${(out.length / 1024).toFixed(1)} KB)`);
+console.log(`✓ js/data.js gerado (${data.LOCAIS.length} locais, ${data.LOCAIS.filter(l => l.diario).length} com diário, ${comFoto} com foto, ${data.PERSONAGENS.length} personagens, ${(out.length / 1024).toFixed(1)} KB)`);

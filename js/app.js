@@ -113,14 +113,16 @@
     { id: "personagens", label: "Personagens", kind: "grid", items: PERSONAGENS, cols: COLS_PERSONAGENS,
       title: "Adivinhe o personagem de hoje", sub: "", placeholder: "Nome do personagem...",
       hintIdx: [0, 1] },
-    { id: "diario", label: "Diário", kind: "hints", items: LOCAIS.filter(l => l.diario),
-      title: "De onde é esse registro?", sub: "Ache o local com entradas do diário de bordo", placeholder: "Nome do local..." }
-  ];
+    { id: "diario", label: "Diário", kind: "hints", items: LOCAIS.filter(l => l.diario), guessItems: LOCAIS,
+      title: "De onde é esse registro?", sub: "Ache o local com entradas do diário de bordo", placeholder: "Nome do local..." },
+    { id: "foto", label: "Foto", kind: "photo", items: LOCAIS.filter(l => l.foto), guessItems: LOCAIS,
+      title: "Onde é isso?", sub: "A foto fica mais nítida a cada erro", placeholder: "Nome do local..." }
+  ].filter(m => m.items.length); // modo sem conteúdo (ex.: sem fotos ainda) não aparece
   const modeById = id => MODES.find(m => m.id === id) || MODES[0];
 
   const settings = Object.assign({ dlc: false, contrast: false, anim: true, seenHelp: false, hard: false, helper: false }, store.get("settings", {}));
   const hintsAt = () => settings.hard ? [] : [4, 6];
-  const maxTries = m => m.kind === "hints" ? (settings.hard ? 4 : 6) : 0;
+  const maxTries = m => m.kind === "grid" ? 0 : (settings.hard ? 4 : 6);
   function applySettings() {
     document.documentElement.dataset.contrast = settings.contrast ? "1" : "0";
     document.documentElement.dataset.anim = settings.anim ? "1" : "0";
@@ -133,7 +135,8 @@
   let viewDay = dayIndex; // pode ser um dia antigo via arquivo
   const daily = {}, freeGames = {};
 
-  const poolFor = mode => mode.items.filter(i => !i.dlc || settings.dlc);
+  // items = quem pode ser alvo; guessItems = quem pode ser chutado (Diário e Foto aceitam qualquer local)
+  const poolFor = mode => (mode.guessItems || mode.items).filter(i => !i.dlc || settings.dlc);
   const statusOf = (mode, guesses, target) =>
     guesses.includes(target) ? "won" : (maxTries(mode) && guesses.length >= maxTries(mode)) ? "lost" : "playing";
   const dayKey = (mode, day) => `${mode.id}:${day}`;
@@ -142,10 +145,10 @@
 
   function makeDaily(mode, day) {
     const pool = mode.items.filter(i => !i.dlc);
-    const avoid = mode.id === "diario" ? dailyTarget(LOCAIS.filter(i => !i.dlc), "locais", day) : null;
+    const avoid = mode.id !== "locais" && mode.kind !== "grid" ? dailyTarget(LOCAIS.filter(i => !i.dlc), "locais", day) : null;
     const target = dailyTarget(pool, mode.id, day, avoid);
     const saved = store.get(dayKey(mode, day), []);
-    const guesses = (Array.isArray(saved) ? saved : []).map(id => mode.items.find(i => i.id === id)).filter(Boolean);
+    const guesses = (Array.isArray(saved) ? saved : []).map(id => (mode.guessItems || mode.items).find(i => i.id === id)).filter(Boolean);
     return { mode, day, target, guesses, free: false, status: statusOf(mode, guesses, target), revealed: false };
   }
   function makeFree(mode) {
@@ -250,7 +253,7 @@
     input.disabled = !playing; goBtn.disabled = !playing;
     input.placeholder = playing ? mode.placeholder : (g.status === "won" ? "Você acertou!" : "Fim das tentativas");
 
-    board.innerHTML = mode.kind === "grid" ? gridHTML(g, animate) : hintsHTML(g, animate);
+    board.innerHTML = mode.kind === "grid" ? gridHTML(g, animate) : mode.kind === "photo" ? photoHTML(g) : hintsHTML(g, animate);
     renderResult(g);
   }
 
@@ -297,26 +300,39 @@
     return html;
   }
 
-  function hintsHTML(g, animate) {
-    const m = g.mode, n = g.guesses.length, done = g.status !== "playing";
-    const log = g.target.diario || g.target.dicas;
-    const shown = done ? log.length : Math.min(n + 1, log.length);
-    const max = maxTries(m);
-    let html = `<div class="tries" aria-label="Tentativas">${Array.from({ length: max }, (_, i) => {
+  function triesHTML(g) {
+    const n = g.guesses.length, done = g.status !== "playing", max = maxTries(g.mode);
+    return `<div class="tries" aria-label="Tentativas">${Array.from({ length: max }, (_, i) => {
       const it = g.guesses[i];
       const cls = !it ? (i === n && !done ? "cur" : "") : it === g.target ? "ok" : "no";
       return `<i class="${cls}"></i>`;
     }).join("")}<span>${done ? "Encerrado" : `Tentativa ${n + 1} de ${max}`}</span></div>`;
+  }
+  function chipsHTML(g) {
+    if (!g.guesses.length) return "";
+    return `<div class="chips">${g.guesses.map(it =>
+      `<span class="chip ${it === g.target ? "ok" : "no"}">${it === g.target ? "✓" : "✗"} ${esc(it.nome)}</span>`).join("")}</div>`;
+  }
+
+  // Foto: níveis 0..5 gerados por tools/fotos.py; o nome da pasta é um hash, não o id.
+  function photoHTML(g) {
+    const n = g.guesses.length, done = g.status !== "playing";
+    const level = done ? 5 : Math.min(n, 5);
+    return triesHTML(g) + `<div class="photo"><img src="assets/fotos/${esc(g.target.foto)}/${level}.jpg" alt="Foto de um local de Outer Wilds" decoding="async"></div>` + chipsHTML(g);
+  }
+
+  function hintsHTML(g, animate) {
+    const n = g.guesses.length, done = g.status !== "playing";
+    const log = g.target.diario || g.target.dicas;
+    const shown = done ? log.length : Math.min(n + 1, log.length);
+    let html = triesHTML(g);
 
     html += `<div class="log">${log.map((d, i) => {
       const open = i < shown, isNew = animate && open && i === shown - 1 && !done;
       return `<div class="entry ${open ? "" : "locked"} ${isNew ? "new" : ""}">
         <b>Registro ${i + 1}</b><span>${open ? esc(d) : "Libera após a próxima tentativa"}</span></div>`;
     }).join("")}</div>`;
-
-    if (n) html += `<div class="chips">${g.guesses.map(it =>
-      `<span class="chip ${it === g.target ? "ok" : "no"}">${it === g.target ? "✓" : "✗"} ${esc(it.nome)}</span>`).join("")}</div>`;
-    return html;
+    return html + chipsHTML(g);
   }
 
   function emojiRows(g) {
@@ -529,13 +545,15 @@
       <h4>Personagens</h4>
       <p>Mesma ideia, mas com Lenhosos e Nomai: espécie, local, papel, instrumento e status.</p>
       <h4>Diário</h4>
-      <p>Você recebe um registro do diário de bordo e tem ${maxTries(MODES[2])} tentativas pra dizer de que lugar ele fala. Os registros são os do próprio jogo, e cada erro libera mais um.</p>
+      <p>Você recebe um registro do diário de bordo e tem ${maxTries(modeById("diario"))} tentativas pra dizer de que lugar ele fala. Os registros são os do próprio jogo, e cada erro libera mais um.</p>
+      <h4>Foto</h4>
+      <p>Uma foto de algum lugar do jogo, bem borrada. Cada erro deixa a imagem mais nítida. Também são ${maxTries(modeById("diario"))} tentativas.</p>
       <div class="legend">
         <span><i style="background:var(--ok)"></i> Correto</span>
         <span><i style="background:var(--near)"></i> Parcial</span>
         <span><i style="background:var(--no)"></i> Errado</span>
       </div>
-      <p class="small">Na coluna Órbita, <b>↑</b> significa que o alvo está mais longe do Sol que o seu chute, e <b>↓</b> que está mais perto. "Parcial" em Corpo aparece quando planeta e lua são vizinhos (ou as duas gêmeas), e em Nomai quando um tem estrutura ativa e o outro só ruínas.</p>
+      <p class="small">"Parcial" em Corpo aparece quando planeta e lua são vizinhos (ou as duas gêmeas), e em Nomai quando um tem estrutura ativa e o outro só ruínas.</p>
       <p class="small">Os locais incluem planetas, luas e também lugares dentro deles: cidades, laboratórios, acampamentos, ilhas e ruínas. Mais de 50 no total.</p>
       <p class="small"><b>Modo livre:</b> alvos aleatórios, quantos quiser, sem afetar as estatísticas. Dá pra ligar os itens de <em>Echoes of the Eye</em> nas configurações.</p>`;
   }
