@@ -197,49 +197,18 @@
   }
   const CLS_LABEL = { ok: "correto", near: "parcial", no: "errado" };
 
-  function levenshtein(a, b) {
-    const prev = Array.from({ length: b.length + 1 }, (_, j) => j);
-    for (let i = 1; i <= a.length; i++) {
-      let diag = prev[0]; prev[0] = i;
-      for (let j = 1; j <= b.length; j++) {
-        const tmp = prev[j];
-        prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
-        diag = tmp;
-      }
-    }
-    return prev[b.length];
-  }
-  // Sem lista de sugestões: aceita o nome digitado com erro de digitação, acento
-  // ou incompleto, desde que só um item encaixe. Devolve o item e se foi corrigido.
+  // Só aceita nome ou apelido exato (ignorando acento e maiúsculas). Sem correção.
   function findItem(mode, q) {
-    const nq = norm(q).replace(/\s+/g, " ");
+    const nq = norm(q);
     if (!nq) return null;
-    const pool = poolFor(mode);
-    const names = i => [i.nome, ...(i.alias || [])].map(norm);
-    const exact = pool.find(i => i.id === q || names(i).includes(nq));
-    if (exact) return { item: exact, fixed: false };
-    if (nq.length < 3) return null;
-    // começo do nome, de uma palavra do nome ou do apelido
-    const starts = pool.filter(i => names(i).some(n => n.startsWith(nq) || n.split(" ").some(w => w.startsWith(nq))));
-    if (starts.length === 1) return { item: starts[0], fixed: true };
-    // distância de edição, tolerando ~1 erro a cada 4 letras
-    let best = null, bestD = Infinity, tie = false;
-    for (const i of pool) for (const n of names(i)) {
-      const d = levenshtein(nq, n);
-      if (d < bestD) { best = i; bestD = d; tie = false; }
-      else if (d === bestD && i !== best) tie = true;
-    }
-    const limit = Math.max(1, Math.floor(nq.length / 4));
-    return best && !tie && bestD <= limit ? { item: best, fixed: true } : null;
+    return poolFor(mode).find(i => i.id === q || norm(i.nome) === nq || (i.alias || []).some(a => norm(a) === nq)) || null;
   }
   function guess(q) {
     const g = current();
     if (g.status !== "playing") return;
-    const found = findItem(g.mode, q);
-    if (!found) { shake(); toast("Não reconheci esse nome. Confira a escrita."); return; }
-    const item = found.item;
+    const item = findItem(g.mode, q);
+    if (!item) { shake(); toast("Escolha um nome da lista."); return; }
     if (g.guesses.includes(item)) { shake(); toast(`Você já tentou ${item.nome}.`); return; }
-    if (found.fixed) toast(`Entendi como ${item.nome}.`);
     g.guesses.push(item);
     g.status = statusOf(g.mode, g.guesses, g.target);
     if (!g.free) store.set(dayKey(g.mode, g.day), g.guesses.map(i => i.id));
@@ -505,7 +474,7 @@
   }
   function closeList() { list.style.display = "none"; sel = -1; }
   function submitFromInput() {
-    // item destacado com as setas ganha; senão vai o texto digitado (com correção de erros)
+    // item destacado com as setas, ou o nome digitado por inteiro
     const open = list.style.display !== "none";
     guess(open && sel >= 0 ? list.children[sel].dataset.id : input.value);
     closeList();
