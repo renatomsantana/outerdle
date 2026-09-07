@@ -108,10 +108,10 @@
 
   const MODES = [
     { id: "locais", label: "Locais", kind: "grid", items: LOCAIS, cols: COLS_LOCAIS,
-      title: "Adivinhe o local de hoje", sub: "Pode estar em qualquer corpo celeste", placeholder: "Nome do local...",
+      title: "Adivinhe o local de hoje", sub: "", placeholder: "Nome do local...",
       hintIdx: [0, 1] },
     { id: "personagens", label: "Personagens", kind: "grid", items: PERSONAGENS, cols: COLS_PERSONAGENS,
-      title: "Adivinhe o personagem de hoje", sub: "Pode ser qualquer personagem, qualquer um mesmo", placeholder: "Nome do personagem...",
+      title: "Adivinhe o personagem de hoje", sub: "", placeholder: "Nome do personagem...",
       hintIdx: [0, 1] },
     { id: "diario", label: "Diário", kind: "hints", items: LOCAIS.filter(l => l.diario),
       title: "De onde é esse registro?", sub: "Ache o local com entradas do diário de bordo", placeholder: "Nome do local..." }
@@ -226,10 +226,18 @@
 
     const archive = !free && viewDay !== dayIndex;
     $("#title").textContent = mode.title;
-    const at = hintsAt();
-    const hintInfo = mode.kind === "grid" && at.length ? ` Dicas no ${at[0]}º e no ${at[1]}º chute.` : "";
-    $("#subtitle").textContent = (g.free ? "Modo livre: alvo aleatório, sem afetar as estatísticas."
-      : archive ? `Arquivo: desafio #${viewDay + 1}, de ${fmtDate(viewDay)}. Não conta pras estatísticas.` : mode.sub + ".") + hintInfo;
+    // subtítulo: nos modos de grade é só a contagem até a próxima dica
+    let sub = mode.sub;
+    if (mode.kind === "grid") {
+      const next = hintsAt().findIndex(at => g.guesses.length < at);
+      if (g.status !== "playing" || next < 0) sub = "";
+      else {
+        const rem = hintsAt()[next] - g.guesses.length;
+        sub = `${rem === 1 ? "Falta 1 chute" : `Faltam ${rem} chutes`} pra dica ${next + 1}`;
+      }
+    }
+    const ctx = g.free ? "Modo livre. " : archive ? `Arquivo: desafio #${viewDay + 1}, de ${fmtDate(viewDay)}. ` : "";
+    $("#subtitle").textContent = ctx + sub;
     $("#seg-daily").classList.toggle("on", !free);
     $("#seg-daily").innerHTML = archive ? `#${viewDay + 1}` : `Hoje #${dayNum}`;
     $("#seg-free").classList.toggle("on", free);
