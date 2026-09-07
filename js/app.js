@@ -249,7 +249,7 @@
     if (g.status === "playing") input.focus();
   }
 
-  const input = $("#guess"), goBtn = $("#go"), board = $("#board"), result = $("#result");
+  const input = $("#guess"), goBtn = $("#go"), list = $("#list"), board = $("#board"), result = $("#result");
 
   function render(animate = false) {
     const mode = modeById(modeId), g = current();
@@ -491,8 +491,39 @@
     setTimeout(() => wrap.remove(), 3500);
   }
 
-  const submitFromInput = () => guess(input.value);
-  input.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitFromInput(); } });
+  // Lista só com nomes que COMEÇAM pelo que foi digitado. Vazio = lista fechada.
+  let sel = -1;
+  function openList() {
+    const g = current(), q = norm(input.value);
+    if (g.status !== "playing" || !q) return closeList();
+    const items = poolFor(g.mode).filter(i => !g.guesses.includes(i) && norm(i.nome).startsWith(q))
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt"));
+    list.innerHTML = items.map(i =>
+      `<div role="option" data-id="${i.id}"><span class="nm">${esc(i.nome)}</span>${i.dlc ? "<small>DLC</small>" : ""}</div>`).join("");
+    list.style.display = items.length ? "block" : "none";
+    sel = -1;
+  }
+  function closeList() { list.style.display = "none"; sel = -1; }
+  function submitFromInput() {
+    // item destacado com as setas ganha; senão vai o texto digitado (com correção de erros)
+    const open = list.style.display !== "none";
+    guess(open && sel >= 0 ? list.children[sel].dataset.id : input.value);
+    closeList();
+  }
+  input.addEventListener("input", openList);
+  input.addEventListener("focus", openList);
+  input.addEventListener("keydown", e => {
+    const opts = [...list.children], open = list.style.display !== "none";
+    if (e.key === "ArrowDown" && open) { e.preventDefault(); sel = Math.min(sel + 1, opts.length - 1); }
+    else if (e.key === "ArrowUp" && open) { e.preventDefault(); sel = Math.max(sel - 1, 0); }
+    else if (e.key === "Enter") { e.preventDefault(); submitFromInput(); return; }
+    else if (e.key === "Escape") { closeList(); return; }
+    else return;
+    opts.forEach((o, i) => o.classList.toggle("sel", i === sel));
+    opts[sel]?.scrollIntoView({ block: "nearest" });
+  });
+  list.addEventListener("mousedown", e => { e.preventDefault(); const d = e.target.closest("[data-id]"); if (d) { guess(d.dataset.id); closeList(); } });
+  document.addEventListener("click", e => { if (!e.target.closest(".search")) closeList(); });
   goBtn.addEventListener("click", submitFromInput);
 
   $("#modes").addEventListener("click", e => {

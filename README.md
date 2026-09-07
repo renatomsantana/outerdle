@@ -112,7 +112,7 @@ O jogo roda inteiro no navegador, então não existe como esconder a resposta de
 
 ## Dificuldade
 
-Por padrão as dicas extras só aparecem na 4ª e na 6ª tentativa, não há lista de sugestões (o jogo corrige erros de digitação e nomes incompletos) e o contador de candidatos fica desligado. Nas configurações há o **Modo difícil ★** (sem dicas extras, Diário com 4 tentativas, resultado marcado com ★) e o contador de candidatos para quem quiser facilitar.
+Por padrão as dicas extras só aparecem na 4ª e na 6ª tentativa, a lista de sugestões só mostra nomes que começam pelo que foi digitado (e o envio corrige erros de digitação) e o contador de candidatos fica desligado. Nas configurações há o **Modo difícil ★** (sem dicas extras, Diário com 4 tentativas, resultado marcado com ★) e o contador de candidatos para quem quiser facilitar.
 
 ## Adicionando conteúdo
 
