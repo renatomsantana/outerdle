@@ -3,3 +3,6 @@ node_modules/
 Thumbs.db
 _site/
 *.log
+
+# originais das fotos (baixados da wiki); so os niveis gerados em assets/fotos vao pro site
+src/fotos/
